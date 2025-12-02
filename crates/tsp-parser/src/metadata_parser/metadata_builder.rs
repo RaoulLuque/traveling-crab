@@ -1,3 +1,4 @@
+use thiserror::Error;
 use tsp_core::{
     instance::InstanceMetadata,
     tsp_lib_spec::{
@@ -5,8 +6,6 @@ use tsp_core::{
         ProblemType,
     },
 };
-
-use thiserror::Error;
 
 use crate::metadata_parser::MetaDataParseError;
 
@@ -75,6 +74,7 @@ impl InstanceMetadataBuilder {
         self.name = Some(name);
         self
     }
+
     pub fn name_mut(&mut self, name: String) -> &mut Self {
         self.name = Some(name);
         self
@@ -84,6 +84,7 @@ impl InstanceMetadataBuilder {
         self.problem_type = Some(problem_type);
         self
     }
+
     pub fn problem_type_mut(&mut self, problem_type: ProblemType) -> &mut Self {
         self.problem_type = Some(problem_type);
         self
@@ -93,6 +94,7 @@ impl InstanceMetadataBuilder {
         self.comment = Some(comment);
         self
     }
+
     pub fn comment_mut(&mut self, comment: String) -> &mut Self {
         self.comment = Some(comment);
         self
@@ -102,6 +104,7 @@ impl InstanceMetadataBuilder {
         self.dimension = Some(dimension);
         self
     }
+
     pub fn dimension_mut(&mut self, dimension: u32) -> &mut Self {
         self.dimension = Some(dimension);
         self
@@ -111,6 +114,7 @@ impl InstanceMetadataBuilder {
         self.capacity = Some(capacity);
         self
     }
+
     pub fn capacity_mut(&mut self, capacity: u32) -> &mut Self {
         self.capacity = Some(capacity);
         self
@@ -120,6 +124,7 @@ impl InstanceMetadataBuilder {
         self.edge_weight_type = Some(edge_weight_type);
         self
     }
+
     pub fn edge_weight_type_mut(&mut self, edge_weight_type: EdgeWeightType) -> &mut Self {
         self.edge_weight_type = Some(edge_weight_type);
         self
@@ -129,6 +134,7 @@ impl InstanceMetadataBuilder {
         self.edge_weight_format = Some(edge_weight_format);
         self
     }
+
     pub fn edge_weight_format_mut(&mut self, edge_weight_format: EdgeWeightFormat) -> &mut Self {
         self.edge_weight_format = Some(edge_weight_format);
         self
@@ -138,6 +144,7 @@ impl InstanceMetadataBuilder {
         self.edge_data_format = Some(edge_data_format);
         self
     }
+
     pub fn edge_data_format_mut(&mut self, edge_data_format: EdgeDataFormat) -> &mut Self {
         self.edge_data_format = Some(edge_data_format);
         self
@@ -147,6 +154,7 @@ impl InstanceMetadataBuilder {
         self.node_coord_type = Some(node_coord_type);
         self
     }
+
     pub fn node_coord_type_mut(&mut self, node_coord_type: NodeCoordType) -> &mut Self {
         self.node_coord_type = Some(node_coord_type);
         self
@@ -156,6 +164,7 @@ impl InstanceMetadataBuilder {
         self.display_data_type = Some(display_data_type);
         self
     }
+
     pub fn display_data_type_mut(&mut self, display_data_type: DisplayDataType) -> &mut Self {
         self.display_data_type = Some(display_data_type);
         self

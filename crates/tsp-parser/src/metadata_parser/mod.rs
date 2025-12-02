@@ -3,6 +3,7 @@ use std::{
     io::{BufReader, Lines},
 };
 
+use thiserror::Error;
 use tsp_core::{
     instance::InstanceMetadata,
     tsp_lib_spec::{
@@ -10,8 +11,6 @@ use tsp_core::{
         ProblemType, TSPDataKeyword,
     },
 };
-
-use thiserror::Error;
 
 use crate::{
     ParserError,
@@ -46,9 +45,9 @@ pub enum MetaDataParseError {
 
 /// Parses the metadata section of a TSP instance file.
 ///
-/// Returns a tuple containing the parsed `InstanceMetadata`, the first encountered `TSPDataKeyword`,
-/// and a reference to the remaining lines iterator starting from the data section (the line after
-/// the first data keyword).
+/// Returns a tuple containing the parsed `InstanceMetadata`, the first encountered
+/// `TSPDataKeyword`, and a reference to the remaining lines iterator starting from the data section
+/// (the line after the first data keyword).
 pub fn parse_metadata(
     input: &mut Lines<BufReader<File>>,
 ) -> Result<(InstanceMetadata, TSPDataKeyword, &Lines<BufReader<File>>), ParserError> {
@@ -61,7 +60,8 @@ pub fn parse_metadata(
         };
         match parse_specification_or_data_keyword(&line, &mut metadata_builder)? {
             None => {
-                // The specification keyword has been added to the builder inside parse_specification_or_data_keyword
+                // The specification keyword has been added to the builder inside
+                // parse_specification_or_data_keyword
             }
             Some(data_keyword) => {
                 // Reached data section, break the loop
