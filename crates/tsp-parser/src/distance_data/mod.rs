@@ -11,7 +11,10 @@ use std::{
 };
 
 use tsp_core::{
-    instance::{InstanceMetadata, distances::DistancesSymmetric},
+    instance::{
+        InstanceMetadata,
+        distances::{DistancesSymmetric, get_lower_triangle_matrix_entry},
+    },
     tsp_lib_spec::TSPDataKeyword,
 };
 
@@ -84,13 +87,13 @@ fn compute_distances_euclidean(
     point_data: Vec<(f64, f64)>,
     dimension: usize,
 ) -> DistancesSymmetric {
-    // TODO: Handle symmetric / asymmetric cases
     let mut distance_data = vec![0; dimension * dimension];
 
     for i in 0..dimension {
-        for j in 0..dimension {
+        for j in i..dimension {
+            let index = get_lower_triangle_matrix_entry(i, j);
             let distance = compute_euclidean_distance(&point_data[i], &point_data[j]);
-            distance_data[i * dimension + j] = distance;
+            distance_data[index] = distance;
         }
     }
 
