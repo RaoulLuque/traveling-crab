@@ -1,3 +1,4 @@
+#[derive(Debug, Clone)]
 pub struct DistancesSymmetric {
     pub data: Vec<u32>,
     pub dimension: usize,

@@ -8,6 +8,7 @@ use crate::{
 
 pub mod distances;
 
+#[derive(Debug, Clone)]
 pub struct TSPSymInstance {
     metadata: InstanceMetadata,
     /// Flattened distance matrix
@@ -45,6 +46,7 @@ impl TSPSymInstance {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct InstanceMetadata {
     pub name: String,
     pub problem_type: ProblemType,

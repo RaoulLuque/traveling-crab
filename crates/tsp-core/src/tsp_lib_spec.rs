@@ -3,6 +3,7 @@
 /// Enumeration of all possible data section keywords in a .tsp file.
 ///
 /// The Keywords are according to the TSPLIB 95 specification.
+#[derive(Debug, Clone)]
 pub enum TSPDataKeyword {
     NODE_COORD_SECTION,
     DEPOT_SECTION,
@@ -18,6 +19,7 @@ pub enum TSPDataKeyword {
 /// of a .tsp file.
 ///
 /// The Keywords are according to the TSPLIB 95 specification.
+#[derive(Debug, Clone)]
 pub enum TSPSpecificationKeyword {
     NAME(String),
     TYPE(ProblemType),
@@ -32,6 +34,7 @@ pub enum TSPSpecificationKeyword {
     EOF,
 }
 
+#[derive(Debug, Clone)]
 pub enum ProblemType {
     TSP,
     ATSP,
@@ -41,7 +44,7 @@ pub enum ProblemType {
     TOUR,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum EdgeWeightType {
     EXPLICIT,
     EUC_2D,
@@ -58,6 +61,7 @@ pub enum EdgeWeightType {
     SPECIAL,
 }
 
+#[derive(Debug, Clone)]
 pub enum EdgeWeightFormat {
     FUNCTION,
     FULL_MATRIX,
@@ -71,17 +75,20 @@ pub enum EdgeWeightFormat {
     LOWER_DIAG_COL,
 }
 
+#[derive(Debug, Clone)]
 pub enum EdgeDataFormat {
     EDGE_LIST,
     ADJ_LIST,
 }
 
+#[derive(Debug, Clone)]
 pub enum NodeCoordType {
     TWOD_COORDS,
     THREED_COORDS,
     NO_COORDS,
 }
 
+#[derive(Debug, Clone)]
 pub enum DisplayDataType {
     COORD_DISPLAY,
     TWOD_DISPLAY,

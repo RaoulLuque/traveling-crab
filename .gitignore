@@ -1,4 +1,4 @@
 /target
 /.vscode
 /foreign_solvers
-/instances
+/instances/tsplib_symmetric

@@ -1,11 +1,46 @@
+[package]
+name = "traveling-crab"
+
+keywords = ["tsp", "algorithms", "graphs", "networks"]
+description = "TSP tooling written in Rust."
+
+readme.workspace = true
+license.workspace = true
+documentation.workspace = true
+repository.workspace = true
+edition.workspace = true
+authors.workspace = true
+categories.workspace = true
+
+[dependencies]
+tsp-parser ={workspace = true}
+
+[workspace.package]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+documentation = "https://docs.rs/traveling-crab"
+repository = "https://github.com/raoulluque/traveling-crab"
+edition = "2024"
+authors = ["Raoul Luqué <raoulsluque@gmail.com>"]
+categories = ["algorithms"]
+
+keywords = ["tsp", "algorithms", "graphs", "networks"]
+description = "TSP tooling written in Rust."
+
 [workspace]
 resolver = "2"
 members = [
-    "crates/*"
+    "crates/*",
+    "."
 ]
 
 [workspace.dependencies]
+criterion = { version = "0.7", features = ["html_reports"] }
+thiserror = "2.0.17"
+
 tsp-core = {path = "crates/tsp-core"}
+tsp-parser = {path = "crates/tsp-parser"}
+tsp-solvers = {path = "crates/tsp-solvers"}
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(docsrs_dep)'] }

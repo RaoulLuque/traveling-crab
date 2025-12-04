@@ -29,6 +29,8 @@ pub enum MetaDataParseError {
     InvalidProblemType(String),
     #[error("Invalid DIMENSION value: {0}")]
     InvalidDimension(String),
+    #[error("Invalid CAPACITY value: {0}")]
+    InvalidCapacity(String),
     #[error("Invalid EDGE_WEIGHT_TYPE value: {0}")]
     InvalidEdgeWeightType(String),
     #[error("Invalid EDGE_WEIGHT_FORMAT value: {0}")]
@@ -89,7 +91,7 @@ fn parse_specification_or_data_keyword(
     match (parts.next(), parts.next()) {
         // Hot path
         (Some(k), Some(v)) => {
-            parse_specification(k.trim_end(), v.trim_end(), metadata_builder)?;
+            parse_specification(k.trim(), v.trim(), metadata_builder)?;
             Ok(None)
         }
         // Cold path(s)
@@ -120,7 +122,7 @@ fn parse_specification(
             metadata_builder.dimension_mut(
                 value
                     .parse()
-                    .map_err(|_| MetaDataParseError::InvalidDimension(keyword.to_string()))?,
+                    .map_err(|_| MetaDataParseError::InvalidDimension(value.to_string()))?,
             );
             Ok(())
         }
@@ -128,7 +130,7 @@ fn parse_specification(
             metadata_builder.capacity_mut(
                 value
                     .parse()
-                    .map_err(|_| MetaDataParseError::InvalidDimension(keyword.to_string()))?,
+                    .map_err(|_| MetaDataParseError::InvalidCapacity(value.to_string()))?,
             );
             Ok(())
         }

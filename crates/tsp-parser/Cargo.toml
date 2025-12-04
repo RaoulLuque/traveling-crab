@@ -1,18 +1,25 @@
 [package]
 name = "tsp-parser"
 version = "0.1.0"
-readme = "README.md"
-license = "MIT OR Apache-2.0"
-description = "TSP Parser written in Rust."
-documentation = "https://docs.rs/traveling-crab"
-repository = "https://github.com/raoulluque/traveling-crab"
+description = "TSP parser."
 
-edition = "2024"
-
-authors = ["Raoul Luque <raoulsluque@gmail.com>"]
 keywords = ["tsp", "algorithms", "graphs", "networks"]
 categories = ["parsing"]
 
+readme.workspace = true
+license.workspace = true
+documentation.workspace = true
+repository.workspace = true
+edition.workspace = true
+authors.workspace = true
+
 [dependencies]
-thiserror = "2.0.17"
+thiserror = {workspace = true}
 tsp-core = {workspace = true}
+
+[dev-dependencies]
+criterion = {workspace = true}
+
+[[bench]]
+name = "parser_bench"
+harness = false
