@@ -10,11 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Build caching
+        uses: Swatinem/rust-cache@v2
       - uses: bencherdev/bencher@main
       - name: Track base branch benchmarks with Bencher
         run: |
           bencher run \
-          --project project-abc4567-wxyz123456789 \
+          --project project-a45fdeb3-1f83-44df-9bdc-020221095a99 \
           --token '${{ secrets.BENCHER_API_TOKEN }}' \
           --branch main \
           --testbed ubuntu-latest \
@@ -26,4 +30,4 @@ jobs:
           --err \
           --adapter json \
           --github-actions '${{ secrets.GITHUB_TOKEN }}' \
-          bencher mock
+          "cargo bench --workspace"
