@@ -2,3 +2,7 @@
 /.vscode
 /foreign_solvers
 /instances/tsplib_symmetric
+
+# Perf
+flamegraph.svg
+perf*

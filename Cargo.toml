@@ -15,6 +15,9 @@ categories.workspace = true
 [dependencies]
 tsp-parser ={workspace = true}
 
+[profile.release]
+debug = true
+
 [workspace.package]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
