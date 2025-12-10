@@ -433,13 +433,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "traveling-crab"
-version = "0.0.0"
-dependencies = [
- "tsp-parser",
-]
-
-[[package]]
 name = "tsp-core"
 version = "0.1.0"
 
@@ -450,6 +443,13 @@ dependencies = [
  "criterion",
  "thiserror",
  "tsp-core",
+]
+
+[[package]]
+name = "tsp-rust"
+version = "0.0.0"
+dependencies = [
+ "tsp-parser",
 ]
 
 [[package]]

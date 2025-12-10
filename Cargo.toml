@@ -1,23 +1,3 @@
-[package]
-name = "traveling-crab"
-
-keywords = ["tsp", "algorithms", "graphs", "networks"]
-description = "TSP tooling written in Rust."
-
-readme.workspace = true
-license.workspace = true
-documentation.workspace = true
-repository.workspace = true
-edition.workspace = true
-authors.workspace = true
-categories.workspace = true
-
-[dependencies]
-tsp-parser ={workspace = true}
-
-[profile.release]
-debug = true
-
 [workspace.package]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
@@ -34,7 +14,6 @@ description = "TSP tooling written in Rust."
 resolver = "2"
 members = [
     "crates/*",
-    "."
 ]
 
 [workspace.dependencies]
@@ -44,6 +23,10 @@ thiserror = "2.0.17"
 tsp-core = {path = "crates/tsp-core"}
 tsp-parser = {path = "crates/tsp-parser"}
 tsp-solvers = {path = "crates/tsp-solvers"}
+
+[profile.release]
+debug = true
+lto = "fat"
 
 [workspace.lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(docsrs_dep)'] }
