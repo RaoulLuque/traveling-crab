@@ -101,6 +101,7 @@ fn compute_distances_euclidean(
 }
 
 /// Computes the Euclidean distance between two points as defined in TSPLIB95.
+#[inline(always)]
 fn compute_euclidean_distance(point_a: &(f64, f64), point_b: &(f64, f64)) -> u32 {
     nint(((point_a.0 - point_b.0).powi(2) + (point_a.1 - point_b.1).powi(2)).sqrt())
 }
@@ -108,6 +109,7 @@ fn compute_euclidean_distance(point_a: &(f64, f64), point_b: &(f64, f64)) -> u32
 /// Nearest integer function as defined in TSPLIB95.
 ///
 /// Expects a non-negative float input.
+#[inline(always)]
 fn nint(x: f64) -> u32 {
     (x + 0.5) as u32
 }

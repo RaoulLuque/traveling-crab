@@ -19,14 +19,15 @@ impl DistancesSymmetric {
             dimension,
         }
     }
-
+    
+    #[inline(always)]
     pub fn get_distance(&self, from: usize, to: usize) -> u32 {
         let index = get_lower_triangle_matrix_entry(from, to);
         self.data[index]
     }
 }
 
-#[inline]
+#[inline(always)]
 /// Computes the index in a vec-flattened lower-(left-)triangular matrix.
 pub fn get_lower_triangle_matrix_entry(row: usize, column: usize) -> usize {
     // TODO: Check if upper triangular matrix would be faster for some reason
