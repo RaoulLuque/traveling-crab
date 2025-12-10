@@ -19,7 +19,7 @@ use tsp_core::{
 };
 
 pub fn parse_data_sections(
-    input: &mut Lines<BufReader<File>>,
+    input: &mut Lines<&[u8]>,
     data_keyword: TSPDataKeyword,
     metadata: &InstanceMetadata,
 ) -> DistancesSymmetric {
@@ -32,7 +32,7 @@ pub fn parse_data_sections(
 }
 
 fn retrieve_distance_data_from_node_coord_section(
-    input: &mut Lines<BufReader<File>>,
+    input: &mut Lines<&[u8]>,
     metadata: &InstanceMetadata,
 ) -> DistancesSymmetric {
     let node_data = retrieve_node_data_from_node_coord_section(input, metadata);
@@ -49,7 +49,7 @@ fn retrieve_distance_data_from_node_coord_section(
 }
 
 fn retrieve_node_data_from_node_coord_section(
-    input: &mut Lines<BufReader<File>>,
+    input: &mut Lines<&[u8]>,
     metadata: &InstanceMetadata,
 ) -> Vec<(f64, f64)> {
     let mut point_data: Vec<(f64, f64)> = Vec::with_capacity(metadata.dimension);

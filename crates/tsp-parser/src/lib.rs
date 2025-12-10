@@ -4,6 +4,7 @@ use std::{
     path::Path,
 };
 
+use memmap2::{Mmap, MmapOptions};
 use thiserror::Error;
 use tsp_core::instance::TSPSymInstance;
 
@@ -24,11 +25,13 @@ pub enum ParserError {
 }
 
 pub fn parse_tsp_instance<P: AsRef<Path>>(instance_path: P) -> Result<TSPSymInstance, ParserError> {
-    let mut lines = BufReader::new(File::open(instance_path)?).lines();
+    // Safety: This is the only point at which we access the file, so the file should not be modified otherwise.
+    let mmap = unsafe { Mmap::map(&File::open(instance_path)?)? };
+    let mut lines = mmap.lines();
 
-    let (metadata, data_keyword, input) = parse_metadata(&mut lines)?;
+    let (metadata, data_keyword) = parse_metadata(&mut lines)?;
 
-    let data = parse_data_sections(input, data_keyword, &metadata);
+    let data = parse_data_sections(&mut lines, data_keyword, &metadata);
 
     Ok(TSPSymInstance::new_from_distances_sym(data, metadata))
 }

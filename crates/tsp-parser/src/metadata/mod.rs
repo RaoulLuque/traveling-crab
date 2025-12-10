@@ -51,15 +51,8 @@ pub enum MetaDataParseError {
 /// `TSPDataKeyword`, and a reference to the remaining lines iterator starting from the data section
 /// (the line after the first data keyword).
 pub fn parse_metadata(
-    input: &mut Lines<BufReader<File>>,
-) -> Result<
-    (
-        InstanceMetadata,
-        TSPDataKeyword,
-        &mut Lines<BufReader<File>>,
-    ),
-    ParserError,
-> {
+    input: &mut Lines<&[u8]>,
+) -> Result<(InstanceMetadata, TSPDataKeyword), ParserError> {
     let mut metadata_builder = InstanceMetadataBuilder::new();
     let data_keyword = loop {
         let Some(Ok(line)) = input.next() else {
@@ -80,7 +73,7 @@ pub fn parse_metadata(
     };
     let metadata = metadata_builder.build()?;
 
-    Ok((metadata, data_keyword, input))
+    Ok((metadata, data_keyword))
 }
 
 fn parse_specification_or_data_keyword(
