@@ -112,5 +112,6 @@ fn compute_euclidean_distance(point_a: &(f64, f64), point_b: &(f64, f64)) -> u32
 /// Expects a non-negative float input.
 #[inline(always)]
 fn nint(x: f64) -> u32 {
+    // TODO: Check if round_ties_even would behave the same and possibly achieve better performance
     (x + 0.5) as u32
 }
