@@ -86,7 +86,7 @@ fn retrieve_node_data_from_node_coord_section(
         // We assume the input to be split by ascii whitespace
         let mut parts = line_str.split_ascii_whitespace();
         let _node_index = parts.next();
-        // TODO: Handwrite parsing to parse as unsigned integer first and if there's a decimal point, switch to float parsing using std
+
         let x_str = parts.next().expect("Missing x coordinate");
         let y_str = parts.next().expect("Missing y coordinate");
         let (x, y) = if is_float_data {

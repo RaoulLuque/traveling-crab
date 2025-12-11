@@ -1,8 +1,7 @@
 use memmap2::{Advice, Mmap};
-use std::{fs::File, io::BufRead, path::Path};
+use std::{fs::File, path::Path};
 use thiserror::Error;
 use tsp_core::instance::TSPSymInstance;
-
 
 use crate::{
     distance_data::parse_data_sections,

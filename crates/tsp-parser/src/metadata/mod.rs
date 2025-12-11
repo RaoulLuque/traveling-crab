@@ -1,8 +1,3 @@
-use std::{
-    fs::File,
-    io::{BufReader, Lines},
-};
-
 use memchr::memchr;
 use memmap2::Mmap;
 use thiserror::Error;
@@ -72,7 +67,7 @@ pub fn parse_metadata(
         // Move the index to the start of the next line (+1 for the newline character)
         *index_in_map += index_newline + 1;
 
-        match parse_specification_or_data_keyword(&line, &mut metadata_builder)? {
+        match parse_specification_or_data_keyword(line, &mut metadata_builder)? {
             None => {
                 // The specification keyword has been added to the builder inside
                 // parse_specification_or_data_keyword
