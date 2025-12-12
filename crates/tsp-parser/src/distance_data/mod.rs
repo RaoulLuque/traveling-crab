@@ -26,21 +26,21 @@ pub fn parse_data_sections(
 ) -> DistancesSymmetric {
     match data_keyword {
         TSPDataKeyword::NODE_COORD_SECTION => {
-            retrieve_distance_data_from_node_coord_section(mmap, index_in_map, metadata)
+            parse_dist_from_node_coord_section(mmap, index_in_map, metadata)
         }
         _ => todo!("Other data sections are not yet implemented"),
     }
 }
 
-fn retrieve_distance_data_from_node_coord_section(
+fn parse_dist_from_node_coord_section(
     mmap: &Mmap,
     index_in_map: &mut usize,
     metadata: &InstanceMetadata,
 ) -> DistancesSymmetric {
-    let node_data = retrieve_node_data_from_node_coord_section(mmap, index_in_map, metadata);
+    let node_data = parse_node_coord_section(mmap, index_in_map, metadata);
     match metadata.edge_weight_type {
         tsp_core::tsp_lib_spec::EdgeWeightType::EUC_2D => {
-            compute_distances_euclidean(node_data, metadata.dimension)
+            distances_euclidean(&node_data, metadata.dimension)
         }
         _ => unimplemented!(
             "Edge weight type {:?} is not yet implemented",
@@ -49,7 +49,7 @@ fn retrieve_distance_data_from_node_coord_section(
     }
 }
 
-fn retrieve_node_data_from_node_coord_section(
+fn parse_node_coord_section(
     mmap: &Mmap,
     index_in_map: &mut usize,
     metadata: &InstanceMetadata,
@@ -120,31 +120,81 @@ fn retrieve_node_data_from_node_coord_section(
     point_data
 }
 
-fn compute_distances_euclidean(
-    point_data: Vec<(f64, f64)>,
-    dimension: usize,
-) -> DistancesSymmetric {
+fn distances_euclidean(point_data: &[(f64, f64)], dimension: usize) -> DistancesSymmetric {
+    let total_size = dimension * (dimension + 1) / 2;
+    let chunk_size = total_size / 1;
     let mut distance_data = vec![0; dimension * (dimension + 1) / 2];
 
-    for i in 0..dimension {
-        for j in 0..i {
-            let index = get_lower_triangle_matrix_entry_row_bigger(i, j);
-            let distance = compute_euclidean_distance(&point_data[i], &point_data[j]);
-            debug_assert!(
-                distance_data.len() > index,
-                "Computed index {} for i: {}, j: {} is out of bounds for distance data of length \
-                 {}",
-                index,
-                i,
-                j,
-                distance_data.len()
-            );
-            // Safety: Index is computed to be within bounds of distance_data
-            unsafe { *distance_data.get_unchecked_mut(index) = distance };
-        }
+    let mut current_chunk_start = 0;
+
+    for chunk in distance_data.chunks_mut(chunk_size) {
+        distances_euclidean_chunk(chunk, &point_data, current_chunk_start);
+
+        current_chunk_start += chunk_size;
     }
 
     DistancesSymmetric::new_from_data(distance_data, dimension)
+}
+
+fn distances_euclidean_chunk(
+    chunk: &mut [u32],
+    point_data: &[(f64, f64)],
+    chunk_start_index: usize,
+) {
+    let (start_row, start_column) = {
+        // We solve (row * (row + 1)) / 2 >= chunk_start_index for row
+        let row = (-0.5 + ((0.25 + 2.0 * chunk_start_index as f64).sqrt())).floor() as usize;
+        let column = chunk_start_index - (row * (row + 1)) / 2;
+        (row, column)
+    };
+
+    let (end_row, end_column) = {
+        let end_index = chunk_start_index + chunk.len() - 1;
+        // We solve (row * (row + 1)) / 2 >= end_index for row
+        let row = (-0.5 + ((0.25 + 2.0 * end_index as f64).sqrt())).floor() as usize;
+        let column = end_index - (row * (row + 1)) / 2;
+        (row, column)
+    };
+
+    // We can omit the column = start_row case, as it is always zero distance
+    for column in start_column..start_row {
+        set_distance(chunk, point_data, start_row, column, chunk_start_index);
+    }
+
+    for row in (start_row + 1)..end_row {
+        // We can omit the column = start_row case, as it is always zero distance
+        for column in 0..row {
+            set_distance(chunk, point_data, row, column, chunk_start_index);
+        }
+    }
+
+    // We can omit the column = start_row case, as it is always zero distance
+    for column in 0..end_column {
+        set_distance(chunk, point_data, end_row, column, chunk_start_index);
+    }
+}
+
+#[inline(always)]
+fn set_distance(
+    chunk: &mut [u32],
+    point_data: &[(f64, f64)],
+    row: usize,
+    column: usize,
+    chunk_start_index: usize,
+) {
+    let index_in_chunk =
+        get_lower_triangle_matrix_entry_row_bigger(row, column) - chunk_start_index;
+    let distance = compute_euclidean_distance(&point_data[row], &point_data[column]);
+    debug_assert!(
+        chunk.len() > index_in_chunk,
+        "Computed index {} for i: {}, j: {} is out of bounds for distance data of length {}",
+        index_in_chunk,
+        row,
+        column,
+        chunk.len()
+    );
+    // Safety: Index is computed to be within bounds of distance_data
+    unsafe { *chunk.get_unchecked_mut(index_in_chunk) = distance };
 }
 
 /// Computes the Euclidean distance between two points as defined in TSPLIB95.
