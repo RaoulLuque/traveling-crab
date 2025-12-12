@@ -1,5 +1,6 @@
-use memmap2::{Advice, Mmap};
 use std::{fs::File, path::Path};
+
+use memmap2::{Advice, Mmap};
 use thiserror::Error;
 use tsp_core::instance::TSPSymInstance;
 
@@ -20,7 +21,8 @@ pub enum ParserError {
 }
 
 pub fn parse_tsp_instance<P: AsRef<Path>>(instance_path: P) -> Result<TSPSymInstance, ParserError> {
-    // Safety: This is the only point at which we access the file, so the file should not be modified otherwise.
+    // Safety: This is the only point at which we access the file, so the file should not be
+    // modified otherwise.
     let mmap = unsafe { Mmap::map(&File::open(instance_path)?)? };
     mmap.advise(Advice::Sequential)?;
     let mut index_in_map = 0;
