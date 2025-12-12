@@ -27,7 +27,7 @@ fn d1291_benchmark(c: &mut Criterion) {
 
 fn d18512_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("d18512_parsing");
-    group.sample_size(10);
+    group.sample_size(20);
     group.bench_function("Parse and compute distances \"d18512.tsp\"", |b| {
         b.iter(|| parse_tsp_instance("../../instances/bench/d18512.tsp").unwrap())
     });

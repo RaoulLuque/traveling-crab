@@ -176,42 +176,60 @@ fn distances_euclidean_chunk(
     // "
     // );
 
+    let start_row_point_data = &point_data[start_row];
     // We can omit the column = start_row case, as it is always zero distance
     for column in start_column..start_row {
-        set_distance(chunk, point_data, start_row, column, chunk_start_index);
+        set_distance(
+            chunk,
+            start_row,
+            column,
+            chunk_start_index,
+            start_row_point_data,
+            &point_data[column],
+        );
     }
 
     for row in (start_row + 1)..end_row {
+        let row_point_data = &point_data[row];
         // We can omit the column = start_row case, as it is always zero distance
         for column in 0..row {
-            set_distance(chunk, point_data, row, column, chunk_start_index);
+            set_distance(
+                chunk,
+                row,
+                column,
+                chunk_start_index,
+                row_point_data,
+                &point_data[column],
+            );
         }
     }
 
+    let end_row_point_data = &point_data[end_row];
     // We can omit the column = start_row case, as it is always zero distance
     for column in 0..end_column {
-        set_distance(chunk, point_data, end_row, column, chunk_start_index);
+        set_distance(
+            chunk,
+            end_row,
+            column,
+            chunk_start_index,
+            end_row_point_data,
+            &point_data[column],
+        );
     }
 }
 
 #[inline(always)]
 fn set_distance(
     chunk: &mut [u32],
-    point_data: &[(f64, f64)],
     row: usize,
     column: usize,
     chunk_start_index: usize,
+    row_point_data: &(f64, f64),
+    column_point_data: &(f64, f64),
 ) {
     let index_in_chunk =
         get_lower_triangle_matrix_entry_row_bigger(row, column) - chunk_start_index;
-    debug_assert!(
-        point_data.len() > row && point_data.len() > column,
-        "Point data has length {}, but trying to access points {} and {}",
-        point_data.len(),
-        row,
-        column
-    );
-    let distance = compute_euclidean_distance(&point_data[row], &point_data[column]);
+    let distance = compute_euclidean_distance(row_point_data, column_point_data);
     debug_assert!(
         chunk.len() > index_in_chunk,
         "Computed index {} for i: {}, j: {} is out of bounds for distance data of length {}",
