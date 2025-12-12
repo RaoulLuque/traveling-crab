@@ -10,13 +10,13 @@ use memmap2::Mmap;
 use tsp_core::{
     instance::{
         InstanceMetadata,
-        distances::{
-            DistancesSymmetric, get_lower_triangle_matrix_entry_column_bigger,
-            get_lower_triangle_matrix_entry_row_bigger,
-        },
+        distances::{DistancesSymmetric, get_lower_triangle_matrix_entry_row_bigger},
     },
     tsp_lib_spec::TSPDataKeyword,
 };
+
+// TODO: Add more fine grained benchmarks to determine optimal parallelism bound
+const PARALLELISM_BOUND: usize = 300_000;
 
 pub fn parse_data_sections(
     mmap: &Mmap,
@@ -122,39 +122,59 @@ fn parse_node_coord_section(
 
 fn distances_euclidean(point_data: &[(f64, f64)], dimension: usize) -> DistancesSymmetric {
     let total_size = dimension * (dimension + 1) / 2;
-    let chunk_size = total_size / 1;
-    let mut distance_data = vec![0; dimension * (dimension + 1) / 2];
 
-    let mut current_chunk_start = 0;
+    let mut distance_data = vec![0; total_size];
 
-    for chunk in distance_data.chunks_mut(chunk_size) {
-        distances_euclidean_chunk(chunk, &point_data, current_chunk_start);
+    if total_size < PARALLELISM_BOUND {
+        distances_euclidean_chunk(&mut distance_data, point_data, 0);
+    } else {
+        let nthreads = std::thread::available_parallelism().unwrap();
+        let chunk_size = total_size.div_ceil(nthreads.get());
 
-        current_chunk_start += chunk_size;
+        std::thread::scope(|scope| {
+            let mut current_chunk_start = 0;
+
+            for chunk in distance_data.chunks_mut(chunk_size) {
+                scope.spawn(move || {
+                    distances_euclidean_chunk(chunk, &point_data, current_chunk_start)
+                });
+
+                current_chunk_start += chunk_size;
+            }
+        });
     }
 
     DistancesSymmetric::new_from_data(distance_data, dimension)
 }
 
+#[inline(always)]
 fn distances_euclidean_chunk(
     chunk: &mut [u32],
     point_data: &[(f64, f64)],
     chunk_start_index: usize,
 ) {
     let (start_row, start_column) = {
-        // We solve (row * (row + 1)) / 2 >= chunk_start_index for row
+        // We solve for row such that (row * (row + 1)) / 2 <= chunk_start_index is tight (i.e. row
+        // + 1 would exceed)
         let row = (-0.5 + ((0.25 + 2.0 * chunk_start_index as f64).sqrt())).floor() as usize;
         let column = chunk_start_index - (row * (row + 1)) / 2;
         (row, column)
     };
 
     let (end_row, end_column) = {
-        let end_index = chunk_start_index + chunk.len() - 1;
-        // We solve (row * (row + 1)) / 2 >= end_index for row
-        let row = (-0.5 + ((0.25 + 2.0 * end_index as f64).sqrt())).floor() as usize;
-        let column = end_index - (row * (row + 1)) / 2;
+        let chunk_end_index = chunk_start_index + chunk.len() - 1;
+        // We solve for row such that (row * (row + 1)) / 2 <= chunk_end_index is tight (i.e. row
+        // + 1 would exceed)
+        let row = (-0.5 + ((0.25 + 2.0 * chunk_end_index as f64).sqrt())).floor() as usize;
+        let column = chunk_end_index - (row * (row + 1)) / 2;
         (row, column)
     };
+
+    // println!(
+    //     "Current thread: \n chunk_start_index {chunk_start_index} start_row: {start_row}, \
+    //      start_column: {start_column}\n  end_row: {end_row}, end_column: {end_column}
+    // "
+    // );
 
     // We can omit the column = start_row case, as it is always zero distance
     for column in start_column..start_row {
@@ -184,6 +204,13 @@ fn set_distance(
 ) {
     let index_in_chunk =
         get_lower_triangle_matrix_entry_row_bigger(row, column) - chunk_start_index;
+    debug_assert!(
+        point_data.len() > row && point_data.len() > column,
+        "Point data has length {}, but trying to access points {} and {}",
+        point_data.len(),
+        row,
+        column
+    );
     let distance = compute_euclidean_distance(&point_data[row], &point_data[column]);
     debug_assert!(
         chunk.len() > index_in_chunk,
