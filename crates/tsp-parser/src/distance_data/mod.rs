@@ -136,7 +136,7 @@ fn distances_euclidean(point_data: &[(f64, f64)], dimension: usize) -> Distances
 
             for chunk in distance_data.chunks_mut(chunk_size) {
                 scope.spawn(move || {
-                    distances_euclidean_chunk(chunk, &point_data, current_chunk_start)
+                    distances_euclidean_chunk(chunk, point_data, current_chunk_start)
                 });
 
                 current_chunk_start += chunk_size;
@@ -170,55 +170,53 @@ fn distances_euclidean_chunk(
         (row, column)
     };
 
-    // println!(
-    //     "Current thread: \n chunk_start_index {chunk_start_index} start_row: {start_row}, \
-    //      start_column: {start_column}\n  end_row: {end_row}, end_column: {end_column}
-    // "
-    // );
-
     let start_row_point_data = &point_data[start_row];
     // We can omit the column = start_row case, as it is always zero distance
-    for column in start_column..start_row {
+    for (column, column_point_data) in point_data
+        .iter()
+        .enumerate()
+        .take(start_row)
+        .skip(start_column)
+    {
         compute_and_set_distance(
             chunk,
             start_row,
             column,
             chunk_start_index,
             start_row_point_data,
-            &point_data[column],
+            column_point_data,
         );
     }
 
     for row in (start_row + 1)..end_row {
         let row_point_data = &point_data[row];
         // We can omit the column = start_row case, as it is always zero distance
-        for column in 0..row {
+        for (column, column_point_data) in point_data.iter().enumerate().take(row) {
             compute_and_set_distance(
                 chunk,
                 row,
                 column,
                 chunk_start_index,
                 row_point_data,
-                &point_data[column],
+                column_point_data,
             );
         }
     }
 
     let end_row_point_data = &point_data[end_row];
     // We can omit the column = start_row case, as it is always zero distance
-    for column in 0..end_column {
+    for (column, column_point_data) in point_data.iter().enumerate().take(end_column) {
         compute_and_set_distance(
             chunk,
             end_row,
             column,
             chunk_start_index,
             end_row_point_data,
-            &point_data[column],
+            column_point_data,
         );
     }
 }
 
-#[inline(always)]
 #[inline(always)]
 fn compute_and_set_distance(
     chunk: &mut [u32],
