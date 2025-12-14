@@ -18,6 +18,8 @@ members = [
 
 [workspace.dependencies]
 criterion = { version = "0.7", features = ["html_reports"] }
+memchr = "2.7.6"
+memmap2 = "0.9.9"
 thiserror = "2.0.17"
 
 tsp-core = {path = "crates/tsp-core"}

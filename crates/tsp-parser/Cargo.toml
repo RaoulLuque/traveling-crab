@@ -14,8 +14,8 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-memchr = "2.7.6"
-memmap2 = "0.9.9"
+memchr = {workspace = true}
+memmap2 = {workspace = true}
 thiserror = {workspace = true}
 tsp-core = {workspace = true}
 
