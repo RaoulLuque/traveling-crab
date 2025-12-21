@@ -1,15 +1,18 @@
 use std::collections::BinaryHeap;
 
 use tsp_core::instance::{
-    distance::{DistanceMatrix, DistanceMatrixSymmetric},
-    edge::{InvWeightUnEdge, UnEdge},
+    edge::{
+        InvWeightUnEdge, UnEdge,
+        data::EdgeDataMatrix,
+        distance::{Distance, DistanceMatrixSym},
+    },
     node::Node,
 };
 
 use crate::CustomBitVec;
 
 /// Compute a minimum 1-tree with given node penalties
-fn min_one_tree(distances: DistanceMatrixSymmetric, penalties: &[i32]) {
+fn min_one_tree(distances: DistanceMatrixSym, penalties: &[i32]) {
     let distances_restricted_to_0_to_n_minus_1 =
         distances.restrict_to_first_n(distances.dimension - 1);
     let tree = min_spanning_tree(&distances_restricted_to_0_to_n_minus_1);
@@ -21,7 +24,7 @@ fn min_one_tree(distances: DistanceMatrixSymmetric, penalties: &[i32]) {
 /// Returns a vector of number of nodes - 1 edges representing the minimum spanning tree.
 ///
 /// For more details, see https://en.wikipedia.org/wiki/Prim%27s_algorithm
-fn min_spanning_tree(distance_matrix: &impl DistanceMatrix) -> Vec<UnEdge> {
+fn min_spanning_tree(distance_matrix: &impl EdgeDataMatrix<Distance>) -> Vec<UnEdge> {
     // TODO: Check if kruskal's algorithm might be faster
     let number_of_nodes = distance_matrix.dimension();
 
@@ -39,7 +42,7 @@ fn min_spanning_tree(distance_matrix: &impl DistanceMatrix) -> Vec<UnEdge> {
     selected.set(0, true);
 
     for to in 1..number_of_nodes {
-        let cost = distance_matrix.get_distance_to_bigger(Node(0), Node(to));
+        let cost = distance_matrix.get_data_to_bigger(Node(0), Node(to));
         next_edges.push(InvWeightUnEdge {
             cost,
             from: Node(0),
@@ -67,7 +70,7 @@ fn min_spanning_tree(distance_matrix: &impl DistanceMatrix) -> Vec<UnEdge> {
             if selected[to] {
                 continue;
             }
-            let cost = distance_matrix.get_distance(weighted_edge.to, Node(to));
+            let cost = distance_matrix.get_data(weighted_edge.to, Node(to));
             next_edges.push(InvWeightUnEdge {
                 cost,
                 from: weighted_edge.to,
@@ -81,20 +84,18 @@ fn min_spanning_tree(distance_matrix: &impl DistanceMatrix) -> Vec<UnEdge> {
 
 #[cfg(test)]
 mod tests {
-    use tsp_core::instance::distance::{Distance, DistanceMatrixSymmetric};
 
     use super::*;
 
     #[test]
     fn test_min_spanning_tree() {
-        let distance_matrix =
-            DistanceMatrixSymmetric::slow_new_from_distance_function(10, |from, to| {
-                if from.0 + 1 == to.0 || from.0 == to.0 + 1 {
-                    Distance(0)
-                } else {
-                    Distance(1)
-                }
-            });
+        let distance_matrix = DistanceMatrixSym::slow_new_from_distance_function(10, |from, to| {
+            if from.0 + 1 == to.0 || from.0 == to.0 + 1 {
+                Distance(0)
+            } else {
+                Distance(1)
+            }
+        });
 
         let mst = min_spanning_tree(&distance_matrix);
         assert_eq!(mst.len(), 9);
