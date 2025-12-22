@@ -40,6 +40,8 @@
 
 use tsp_core::instance::edge::{data::EdgeDataMatrixSym, distance::Distance};
 
+mod trees;
+
 pub fn held_karp(distances: &EdgeDataMatrixSym<Distance>) {
     let mut upper_bound = u32::MAX;
     let mut edge_states = EdgeDataMatrixSym {
