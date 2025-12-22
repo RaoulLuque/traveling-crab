@@ -21,10 +21,10 @@ fn min_one_tree(
     let tree = min_spanning_tree(&distances_restricted, edge_states, penalties);
 }
 
-/// Compute a minimum spanning tree for given nodes and edges using prim's algorithm.
-/// We assume that the distance matrix is valid, i.e., it models a complete graph.
+/// Compute a minimum spanning tree with given edge states and node penalties. Implements a
+/// variation of Prim's algorithm to abide the edge states.
 ///
-/// Returns a vector of number of nodes - 1 edges representing the minimum spanning tree.
+/// Returns a vector of edges representing the minimum spanning tree.
 ///
 /// For more details, see https://en.wikipedia.org/wiki/Prim%27s_algorithm
 fn min_spanning_tree(
@@ -105,6 +105,8 @@ fn min_spanning_tree(
             return None;
         }
     }
+
+    debug_assert_eq!(tree.len(), number_of_nodes - 1);
 
     Some(tree)
 }
