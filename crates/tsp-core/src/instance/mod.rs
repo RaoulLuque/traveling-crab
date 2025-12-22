@@ -1,5 +1,6 @@
 use crate::{
     instance::edge::{
+        UnEdge,
         data::EdgeDataMatrixSym,
         distance::{Distance, DistanceMatrixSym},
     },
@@ -63,4 +64,9 @@ pub struct InstanceMetadata {
     /// Defaults to NO_COORDS
     pub node_coord_type: NodeCoordType,
     pub display_data_type: Option<DisplayDataType>,
+}
+
+pub struct UnTour {
+    pub edges: Vec<UnEdge>,
+    pub cost: Distance,
 }
