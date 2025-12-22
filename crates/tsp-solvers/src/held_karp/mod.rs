@@ -69,7 +69,7 @@ const MAX_ITERATIONS: usize = 10;
 const INITIAL_ALPHA: f64 = 2.0;
 
 const INITIAL_BETA: f64 = 0.99;
-const BETA_INCREASE: f64 = 0.9;
+const BETA: f64 = 0.9;
 
 type EdgeStateMatrix = EdgeDataMatrixSym<EdgeState>;
 
@@ -116,11 +116,18 @@ impl EdgeState {
 /// bb_limit: A usize that sets the limit for branch-and-bound exploration
 /// depth: The current depth in the search tree
 /// max_iterations: The maximum number of iterations allowed
-/// upper_bound: A mutable reference to the current best upper bound on the tour cost
+/// upper_bound: A mutable reference to the current best upper bound on the tour cost (that is, the
+/// cost of the best tour found so far)
+/// best_tour: A mutable reference to an Option<UnTour> that stores the best tour found so far
+///
+/// TODO: Summarize arguments in Held-Karp State Struct or Smth
 fn explore_node(
     distances: &EdgeDataMatrixSym<Distance>,
+    scaled_distances: &EdgeDataMatrixSym<ScaledDistance>,
     edge_states: &mut EdgeStateMatrix,
-    upper_bound: u32,
+    node_penalties: &mut [ScaledDistance],
+    upper_bound: &mut Distance,
+    best_tour: &mut Option<UnTour>,
     bb_counter: &mut usize,
     bb_limit: Option<usize>,
     depth: usize,
@@ -128,29 +135,49 @@ fn explore_node(
     // Increment the branch count
     *bb_counter += 1;
 
-    // Check if the branch and bound limit has been reached
     if let Some(limit) = bb_limit {
         if *bb_counter >= limit {
             return;
         }
     }
 
-    // match held_karp_lower_bound() {
-    //     LowerBoundOutput::Tour(cost) => {
-    //         // Found a new tour, that is, an upper bound
-    //         upper_bound = cost;
-    //         return;
-    //     }
-    //     LowerBoundOutput::LowerBound(lower_bound) => {
-    //         // Check if the lower bound is better than the current best cost
-    //         if lower_bound < upper_bound {
-    //             // Prune this node, as we have already found a better tour than the lower bound
-    //             return;
-    //         }
-    //     }
-    // };
+    let (max_iterations, beta) = if depth == 0 {
+        (INITIAL_MAX_ITERATIONS, INITIAL_BETA)
+    } else {
+        (MAX_ITERATIONS, BETA)
+    };
 
-    let branching_edge = edge_to_branch_on();
+    let tree = match held_karp_lower_bound(
+        distances,
+        scaled_distances,
+        edge_states,
+        node_penalties,
+        *upper_bound,
+        max_iterations,
+        beta,
+    ) {
+        Some(LowerBoundOutput::Tour(tour)) => {
+            // Found a new tour, that is, an upper bound
+            *upper_bound = tour.cost;
+            *best_tour = Some(tour);
+            return;
+        }
+        Some(LowerBoundOutput::LowerBound(lower_bound, one_tree)) => {
+            // Check if the lower bound is better than the current best cost
+            if lower_bound >= *upper_bound {
+                // Prune this node, as we have already found a better tour than the lower bound
+                return;
+            } else {
+                one_tree
+            }
+        }
+        None => {
+            // Infeasible node, prune
+            return;
+        }
+    };
+
+    let branching_edge = edge_to_branch_on(scaled_distances, edge_states, node_penalties, &tree);
 
     // Try exploring the branch excluding the edge
     todo!();
@@ -160,7 +187,7 @@ fn explore_node(
 }
 
 enum LowerBoundOutput {
-    LowerBound(Distance),
+    LowerBound(Distance, Vec<UnEdge>),
     Tour(UnTour),
 }
 
@@ -185,7 +212,7 @@ fn held_karp_lower_bound(
 
     let node_penalty_sum: ScaledDistance = node_penalties.iter().sum();
 
-    loop {
+    let one_tree = loop {
         let one_tree = min_one_tree(scaled_distances, edge_states, node_penalties)?;
 
         // Compute the cost of the 1-tree with penalties. This is simultaneously the value of
@@ -209,7 +236,7 @@ fn held_karp_lower_bound(
 
         if one_tree_cost >= scaled_bound {
             // Lower bound exceeds current upper bound, prune
-            break;
+            break one_tree;
         }
 
         // Next we check the degrees of the nodes in the 1-tree
@@ -246,7 +273,7 @@ fn held_karp_lower_bound(
 
         if iter_count >= max_iterations {
             // Reached maximum iterations
-            break;
+            break one_tree;
         }
 
         // TODO: Research on subgradient method for non-smooth optimization to find out more about
@@ -256,7 +283,7 @@ fn held_karp_lower_bound(
 
         if step_size <= 3 {
             // Step size is very small (<= 3 in scaled), we probably won't be making much progress
-            break;
+            break one_tree;
         }
 
         alpha *= beta;
@@ -267,13 +294,34 @@ fn held_karp_lower_bound(
             let adjustment = ScaledDistance(step_size * d);
             *node_penalty += adjustment;
         }
-    }
+    };
 
     let best_lower_bound = scaled_best_lower_bound.to_distance_rounded_up();
 
-    Some(LowerBoundOutput::LowerBound(best_lower_bound))
+    Some(LowerBoundOutput::LowerBound(best_lower_bound, one_tree))
 }
 
-fn edge_to_branch_on() {
-    todo!();
+/// Select an edge from the 1-tree to branch on.
+fn edge_to_branch_on(
+    scaled_distances: &EdgeDataMatrixSym<ScaledDistance>,
+    edge_states: &EdgeStateMatrix,
+    node_penalties: &[ScaledDistance],
+    one_tree: &[UnEdge],
+) -> Option<UnEdge> {
+    let mut minimum_edge = None;
+    let mut minimum_edge_distance = ScaledDistance::MAX;
+
+    for edge in one_tree {
+        if edge_states.get_data(edge.from, edge.to) == EdgeState::Available {
+            let reduced_distance = scaled_distances.get_data(edge.from, edge.to)
+                - node_penalties[edge.from.0]
+                - node_penalties[edge.to.0];
+            if reduced_distance < minimum_edge_distance {
+                minimum_edge_distance = reduced_distance;
+                minimum_edge = Some(*edge);
+            }
+        }
+    }
+
+    minimum_edge
 }
