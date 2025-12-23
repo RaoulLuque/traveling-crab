@@ -65,11 +65,14 @@ pub fn held_karp(distances: &EdgeDataMatrixSym<Distance>) -> Option<UnTour> {
         dimension: distances.dimension,
     };
 
-    let mut node_penalties = vec![ScaledDistance(0); distances.dimension];
+    let mut node_penalties = initial_penalties(distances.dimension);
     let mut fixed_degrees = vec![0u32; distances.dimension];
     let mut best_tour = None;
     let mut bb_counter = 0;
     let mut upper_bound = Distance::MAX;
+
+    let start_time = std::time::Instant::now();
+    let mut number_computed_one_trees = 0usize;
 
     explore_node(
         distances,
@@ -82,6 +85,8 @@ pub fn held_karp(distances: &EdgeDataMatrixSym<Distance>) -> Option<UnTour> {
         &mut bb_counter,
         None,
         0,
+        start_time,
+        &mut number_computed_one_trees,
     );
 
     best_tour
@@ -156,6 +161,8 @@ fn explore_node(
     bb_counter: &mut usize,
     bb_limit: Option<usize>,
     depth: usize,
+    start_time: std::time::Instant,
+    number_computed_one_trees: &mut usize,
 ) {
     // Increment the branch count
     *bb_counter += 1;
@@ -180,6 +187,8 @@ fn explore_node(
         *upper_bound,
         max_iterations,
         beta,
+        start_time,
+        number_computed_one_trees,
     ) {
         Some(LowerBoundOutput::Tour(tour)) => {
             // Found a new tour, that is, an upper bound
@@ -191,6 +200,10 @@ fn explore_node(
         Some(LowerBoundOutput::LowerBound(lower_bound, one_tree)) => {
             // Check if the lower bound is better than the current best cost
             if lower_bound >= *upper_bound {
+                println!(
+                    "Pruning node with lower bound {:?} >= upper bound {:?}",
+                    lower_bound, *upper_bound
+                );
                 // Prune this node, as we have already found a better tour than the lower bound
                 return;
             } else {
@@ -225,6 +238,8 @@ fn explore_node(
             bb_counter,
             bb_limit,
             depth + 1,
+            start_time,
+            number_computed_one_trees,
         );
 
         edge_states.set_data(branching_edge.from, branching_edge.to, EdgeState::Available);
@@ -249,6 +264,8 @@ fn explore_node(
             bb_counter,
             bb_limit,
             depth + 1,
+            start_time,
+            number_computed_one_trees,
         );
 
         // Backtrack
@@ -272,6 +289,8 @@ fn held_karp_lower_bound(
     upper_bound: Distance,
     max_iterations: usize,
     beta: f64,
+    start_time: std::time::Instant,
+    number_computed_one_trees: &mut usize,
 ) -> Option<LowerBoundOutput> {
     let scaled_bound = ScaledDistance::from_distance(upper_bound);
 
@@ -286,6 +305,17 @@ fn held_karp_lower_bound(
 
     let one_tree = loop {
         let one_tree = min_one_tree(scaled_distances, edge_states, node_penalties)?;
+        *number_computed_one_trees += 1;
+
+        if *number_computed_one_trees % 1000000 == 0 {
+            let elapsed = start_time.elapsed().as_secs_f64();
+            println!(
+                "Computed {:8} 1-trees in {:8.2?} ({:8.2} 1-trees/sec)",
+                *number_computed_one_trees,
+                elapsed,
+                *number_computed_one_trees as f64 / elapsed
+            );
+        }
 
         // Compute the cost of the 1-tree with penalties. This is simultaneously the value of
         // the lagrangian relaxation and thus a lower bound (possibly an upper bound too, if it is a
@@ -303,6 +333,10 @@ fn held_karp_lower_bound(
         };
 
         if one_tree_cost > scaled_best_lower_bound {
+            // println!(
+            //     "New best lower bound found: {:?}",
+            //     one_tree_cost.to_distance_rounded_up()
+            // );
             scaled_best_lower_bound = one_tree_cost;
         }
 
@@ -396,4 +430,8 @@ fn edge_to_branch_on(
     }
 
     minimum_edge
+}
+
+fn initial_penalties(dimension: usize) -> Vec<ScaledDistance> {
+    vec![ScaledDistance(0); dimension]
 }

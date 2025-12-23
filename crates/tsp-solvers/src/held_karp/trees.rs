@@ -124,6 +124,8 @@ fn min_spanning_tree(
         let current_penalty = penalties[curr.0];
 
         for (index, next) in remaining_nodes.iter().enumerate() {
+            // TODO: Change edge states and distances to adjacency lists, to be able to iterate only
+            //       over neighbors of current node
             match edge_states.get_data(curr, *next) {
                 EdgeState::Excluded => continue,
                 EdgeState::Available => {
