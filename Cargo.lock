@@ -506,7 +506,9 @@ name = "tsp-solvers"
 version = "0.1.0"
 dependencies = [
  "bitvec",
+ "criterion",
  "tsp-core",
+ "tsp-parser",
 ]
 
 [[package]]

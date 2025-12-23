@@ -17,3 +17,12 @@ authors.workspace = true
 bitvec = {workspace = true}
 
 tsp-core = {workspace = true}
+
+[dev-dependencies]
+criterion = {workspace = true}
+
+tsp-parser = {workspace = true}
+
+[[bench]]
+name = "one_tree"
+harness = false

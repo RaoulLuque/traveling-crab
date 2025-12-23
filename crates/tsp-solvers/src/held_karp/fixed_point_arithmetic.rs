@@ -8,7 +8,7 @@ use tsp_core::instance::edge::distance::Distance;
 const FIXED_POINT_FRACTIONAL_BITS: u32 = 5;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Default)]
-pub(crate) struct ScaledDistance(pub i32);
+pub struct ScaledDistance(pub i32);
 
 impl ScaledDistance {
     pub const MAX: ScaledDistance = ScaledDistance(i32::MAX);

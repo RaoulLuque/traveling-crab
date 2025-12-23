@@ -47,8 +47,8 @@ use tsp_core::instance::{
 
 use crate::held_karp::{fixed_point_arithmetic::ScaledDistance, trees::min_one_tree};
 
-mod fixed_point_arithmetic;
-mod trees;
+pub mod fixed_point_arithmetic;
+pub mod trees;
 
 pub fn held_karp(distances: &EdgeDataMatrixSym<Distance>) -> Option<UnTour> {
     let mut edge_states = EdgeDataMatrixSym {
@@ -104,7 +104,7 @@ type EdgeStateMatrix = EdgeDataMatrixSym<EdgeState>;
 
 #[repr(i8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum EdgeState {
+pub enum EdgeState {
     Available = 1,
     Excluded = 0,
     Fixed = -1,
