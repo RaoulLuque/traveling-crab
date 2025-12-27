@@ -1,20 +1,20 @@
 NAME: 10
 TYPE: TSP
-COMMENT: Imaginary instance of 12 locations
+COMMENT: Imaginary instance of 12 locations in a simple square / cycle with vertices: (0.0, 0.0), (0.0, 300.0), (300.0, 300.0), (300.0, 0.0)
 DIMENSION: 12
 EDGE_WEIGHT_TYPE: EUC_2D
 NODE_COORD_SECTION
-1 0.0 0.0
-2 0.0 100.0
+1 300.0 0.0
+2 100.0 300.0
 3 0.0 200.0
-4 0.0 300.0
-5 100.0 300.0
-6 200.0 300.0
-7 300.0 300.0
+4 300.0 300.0
+5 0.0 100.0
+6 200.0 0.0
+7 0.0 300.0
 8 300.0 200.0
 9 300.0 100.0
-10 300.0 0.0
-11 200.0 0.0
+10 0.0 0.0
+11 200.0 300.0
 12 100.0 0.0
 EOF
 

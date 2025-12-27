@@ -10,13 +10,56 @@ fn test_held_karp_on_12() {
     let tsp_instance = tsp_parser::parse_tsp_instance("../../instances/bench/12.tsp").unwrap();
     let distances_non_symmetric = tsp_instance.distances().to_non_symmetric();
     let best_tour = held_karp(&distances_non_symmetric).unwrap();
-    let mut edges = Vec::with_capacity(12);
-    for i in 0..12 {
-        edges.push(UnEdge {
-            from: Node(i),
-            to: Node((i + 1) % 12),
-        });
-    }
+    let edges = vec![
+        UnEdge {
+            from: Node(1),
+            to: Node(6),
+        },
+        UnEdge {
+            from: Node(6),
+            to: Node(2),
+        },
+        UnEdge {
+            from: Node(1),
+            to: Node(10),
+        },
+        UnEdge {
+            from: Node(10),
+            to: Node(3),
+        },
+        UnEdge {
+            from: Node(2),
+            to: Node(4),
+        },
+        UnEdge {
+            from: Node(4),
+            to: Node(9),
+        },
+        UnEdge {
+            from: Node(9),
+            to: Node(11),
+        },
+        UnEdge {
+            from: Node(11),
+            to: Node(5),
+        },
+        UnEdge {
+            from: Node(3),
+            to: Node(7),
+        },
+        UnEdge {
+            from: Node(7),
+            to: Node(8),
+        },
+        UnEdge {
+            from: Node(0),
+            to: Node(5),
+        },
+        UnEdge {
+            from: Node(0),
+            to: Node(8),
+        },
+    ];
     let expected_tour = UnTour {
         edges,
         cost: Distance(1200),

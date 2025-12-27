@@ -3,7 +3,7 @@ use criterion::{Criterion, criterion_group, criterion_main};
 use tsp_parser::parse_tsp_instance;
 use tsp_solvers::held_karp;
 
-fn held_karp_benchmark_og(c: &mut Criterion) {
+fn held_karp_og_12(c: &mut Criterion) {
     let tsp_instance = parse_tsp_instance("../../instances/bench/12.tsp").unwrap();
     let lower_distance_matrix = concorde_rs::LowerDistanceMatrix {
         num_nodes: tsp_instance.metadata().dimension as u32,
@@ -19,7 +19,7 @@ fn held_karp_benchmark_og(c: &mut Criterion) {
     });
 }
 
-fn held_karp_benchmark(c: &mut Criterion) {
+fn held_karp_own_12(c: &mut Criterion) {
     let tsp_instance = parse_tsp_instance("../../instances/bench/12.tsp").unwrap();
     let non_symmetric_matrix = tsp_instance.distances().to_non_symmetric();
 
@@ -28,5 +28,5 @@ fn held_karp_benchmark(c: &mut Criterion) {
     });
 }
 
-criterion_group!(held_karp_bench, held_karp_benchmark_og, held_karp_benchmark);
-criterion_main!(held_karp_bench);
+criterion_group!(held_karp_bench_12, held_karp_og_12, held_karp_own_12);
+criterion_main!(held_karp_bench_12);
