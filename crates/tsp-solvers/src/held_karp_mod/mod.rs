@@ -40,6 +40,7 @@
 
 use std::u32;
 
+use log::info;
 use tsp_core::instance::{
     UnTour,
     edge::{
@@ -55,6 +56,7 @@ use crate::held_karp_mod::trees::min_one_tree;
 pub mod trees;
 
 pub fn held_karp(distances: &EdgeDataMatrix<Distance>) -> Option<UnTour> {
+    info!("Starting Held-Karp solver for instance");
     let mut edge_states = EdgeDataMatrix {
         data: vec![EdgeState::Available; distances.data.len()],
         dimension: distances.dimension,
@@ -75,9 +77,6 @@ pub fn held_karp(distances: &EdgeDataMatrix<Distance>) -> Option<UnTour> {
     let mut bb_counter = 0;
     let mut upper_bound = Distance::MAX;
 
-    let start_time = std::time::Instant::now();
-    let mut number_computed_one_trees = 0usize;
-
     explore_node(
         distances,
         &scaled_distances,
@@ -89,8 +88,6 @@ pub fn held_karp(distances: &EdgeDataMatrix<Distance>) -> Option<UnTour> {
         &mut bb_counter,
         None,
         0,
-        start_time,
-        &mut number_computed_one_trees,
     );
 
     best_tour
@@ -110,32 +107,6 @@ pub enum EdgeState {
     Available = 1,
     Excluded = 0,
     Fixed = -1,
-}
-
-impl EdgeState {
-    /// Constructs an EdgeState from an i8 value, panicking if the value is invalid.
-    fn from_i8(value: i8) -> Self {
-        match value {
-            1 => EdgeState::Available,
-            0 => EdgeState::Excluded,
-            -1 => EdgeState::Fixed,
-            _ => panic!("Invalid value for EdgeState: {}", value),
-        }
-    }
-
-    /// Constructs an EdgeState from an i8 value without checking its validity.
-    ///
-    /// # Safety
-    /// The caller must ensure that the value is one of 1, 0, or -1.
-    unsafe fn from_i8_unchecked(value: i8) -> Self {
-        // SAFETY: Caller guarantees value is valid
-        unsafe { std::mem::transmute(value) }
-    }
-
-    fn flip(self) -> Self {
-        // SAFETY: The negation of a valid EdgeState value is also valid
-        unsafe { EdgeState::from_i8_unchecked(-(self as i8)) }
-    }
 }
 
 /// Depth-first branch-and-bound search to find optimal TSP Tour.
@@ -163,8 +134,6 @@ fn explore_node(
     bb_counter: &mut usize,
     bb_limit: Option<usize>,
     depth: usize,
-    start_time: std::time::Instant,
-    number_computed_one_trees: &mut usize,
 ) {
     // Increment the branch count
     *bb_counter += 1;
@@ -189,8 +158,6 @@ fn explore_node(
         *upper_bound,
         max_iterations,
         beta,
-        start_time,
-        number_computed_one_trees,
     ) {
         Some(LowerBoundOutput::Tour(tour)) => {
             // Found a new tour, that is, an upper bound
@@ -236,8 +203,6 @@ fn explore_node(
             bb_counter,
             bb_limit,
             depth + 1,
-            start_time,
-            number_computed_one_trees,
         );
 
         edge_states.set_data(branching_edge.from, branching_edge.to, EdgeState::Available);
@@ -262,8 +227,6 @@ fn explore_node(
             bb_counter,
             bb_limit,
             depth + 1,
-            start_time,
-            number_computed_one_trees,
         );
 
         // Backtrack
@@ -287,8 +250,6 @@ fn held_karp_lower_bound(
     upper_bound: Distance,
     max_iterations: usize,
     beta: f64,
-    start_time: std::time::Instant,
-    number_computed_one_trees: &mut usize,
 ) -> Option<LowerBoundOutput> {
     let scaled_upper_bound = ScaledDistance::from_distance(upper_bound);
 
@@ -303,17 +264,6 @@ fn held_karp_lower_bound(
 
     let one_tree = loop {
         let one_tree = min_one_tree(scaled_distances, edge_states, node_penalties)?;
-        *number_computed_one_trees += 1;
-
-        if *number_computed_one_trees % 1000000 == 0 {
-            // let elapsed = start_time.elapsed().as_secs_f64();
-            // println!(
-            //     "Computed {:8} 1-trees in {:8.2?} ({:8.2} 1-trees/sec)",
-            //     *number_computed_one_trees,
-            //     elapsed,
-            //     *number_computed_one_trees as f64 / elapsed
-            // );
-        }
 
         // Compute the cost of the 1-tree with penalties. This is simultaneously the value of
         // the lagrangian relaxation and thus a lower bound (possibly an upper bound too, if it is a
