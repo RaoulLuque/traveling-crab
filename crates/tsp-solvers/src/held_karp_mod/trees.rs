@@ -89,8 +89,6 @@ pub fn min_one_tree(
 /// variation of Prim's algorithm to abide the edge states.
 ///
 /// Returns a vector of edges representing the minimum spanning tree.
-///
-/// For more details, see https://en.wikipedia.org/wiki/Prim%27s_algorithm
 fn min_spanning_tree(
     distances_scaled: EdgeDataMatrixZeroRemoved<ScaledDistance>,
     edge_states: EdgeDataMatrixZeroRemoved<EdgeState>,

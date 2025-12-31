@@ -4,7 +4,7 @@
   <img src="assets/images/traveling_salescrab.png" alt="Traveling Salescrab"/>
 </p>
 
-This crate contains tools for solving the Traveling Salesperson Problem (TSP). The TSP is a classic optimization problem where the goal is to find the shortest possible route that visits a set of cities and returns to the origin city.
+This repository contains different crates for solving the Traveling Salesperson Problem (TSP) in the [Rust Programming Language](https://rust-lang.org/). The TSP is a classic optimization problem where the goal is to find the shortest possible route that visits a set of cities and returns to the origin city.
 
 ## References and Credit
 

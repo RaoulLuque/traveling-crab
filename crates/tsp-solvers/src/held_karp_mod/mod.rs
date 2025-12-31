@@ -93,8 +93,12 @@ use tsp_core::instance::{
 
 use crate::held_karp_mod::trees::min_one_tree;
 
-pub mod trees;
+mod trees;
 
+/// Solve the Traveling Salesman Problem using the Held-Karp algorithm.
+///
+/// For a detailed explanation of the algorithm, see the [module-level
+/// documentation][crate::held_karp_mod].
 pub fn held_karp(distances: &EdgeDataMatrix<Distance>) -> Option<UnTour> {
     info!("Starting Held-Karp solver for instance");
     let mut edge_states = EdgeDataMatrix {
@@ -155,24 +159,19 @@ const BETA: f64 = 0.9;
 
 #[repr(i8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum EdgeState {
+/// State of an edge in the branch-and-bound search.
+enum EdgeState {
+    /// Edge is available for inclusion or exclusion, i.e. not yet decided.
     Available = 1,
+    /// Edge is currently excluded from the tour and thus 1-trees / spanning trees.
     Excluded = 0,
+    /// Edge is currently fixed to be included in the tour and thus 1-trees / spanning trees.
     Fixed = -1,
 }
 
-/// Depth-first branch-and-bound search to find optimal TSP Tour.
-///
-/// TODO: Document properly
-///
-/// bb_counter: A mutable reference to a usize that counts the number of branch-and-bound nodes
-/// explored
-/// bb_limit: A usize that sets the limit for branch-and-bound exploration
-/// depth: The current depth in the search tree
-/// max_iterations: The maximum number of iterations allowed
-/// upper_bound: A mutable reference to the current best upper bound on the tour cost (that is, the
-/// cost of the best tour found so far)
-/// best_tour: A mutable reference to an Option<UnTour> that stores the best tour found so far
+/// Depth-first branch-and-bound search exploring nodes recursively.
+/// Computes a lower bound at each node using Held-Karp lower bound computation and then branches
+/// on an edge from the resulting 1-tree.
 ///
 /// TODO: Summarize arguments in Held-Karp State Struct or Smth
 /// TODO: Possibly remove upper_bound as best_tour.cost already contains that information
@@ -329,47 +328,8 @@ fn held_karp_lower_bound(
             let mut base_cost = 2 * node_penalty_sum;
 
             for edge in &one_tree {
-                debug_assert!(
-                    if scaled_distances.get_data(edge.from, edge.to).0 >= 0 {
-                        i32::MAX - scaled_distances.get_data(edge.from, edge.to).0 >= base_cost.0
-                    } else {
-                        i32::MIN - scaled_distances.get_data(edge.from, edge.to).0 <= base_cost.0
-                    },
-                    "Overflow in Held-Karp lower bound calculation: base_cost: {}, adding scaled \
-                     distance from edge {:?}: {} \n Node penalty sum is: {}",
-                    base_cost.0,
-                    edge,
-                    scaled_distances.get_data(edge.from, edge.to).0,
-                    node_penalty_sum.0
-                );
                 base_cost += scaled_distances.get_data(edge.from, edge.to);
-                debug_assert!(
-                    if node_penalties[edge.from.0].0 >= 0 {
-                        i32::MIN + node_penalties[edge.from.0].0 <= base_cost.0
-                    } else {
-                        i32::MAX + node_penalties[edge.from.0].0 >= base_cost.0
-                    },
-                    "Underflow in Held-Karp lower bound calculation: base_cost: {}, subtracting \
-                     penalty for from node {}: {} \n Node penalty sum is: {}",
-                    base_cost.0,
-                    edge.from.0,
-                    node_penalties[edge.from.0].0,
-                    node_penalty_sum.0
-                );
                 base_cost -= node_penalties[edge.from.0];
-                debug_assert!(
-                    if node_penalties[edge.to.0].0 >= 0 {
-                        i32::MIN + node_penalties[edge.to.0].0 <= base_cost.0
-                    } else {
-                        i32::MAX + node_penalties[edge.to.0].0 >= base_cost.0
-                    },
-                    "Underflow in Held-Karp lower bound calculation: base_cost: {}, subtracting \
-                     penalty for from node {}: {} \n Node penalty sum is: {}",
-                    base_cost.0,
-                    edge.to.0,
-                    node_penalties[edge.to.0].0,
-                    node_penalty_sum.0
-                );
                 base_cost -= node_penalties[edge.to.0];
             }
 
@@ -453,6 +413,9 @@ fn held_karp_lower_bound(
 }
 
 /// Select an edge from the 1-tree to branch on.
+///
+/// The edge with the minimum reduced cost (edge_cost - node_penalties[from] - node_penalties[to])
+/// among available edges is selected for branching.
 fn edge_to_branch_on(
     scaled_distances: &EdgeDataMatrix<ScaledDistance>,
     edge_states: &EdgeDataMatrix<EdgeState>,
