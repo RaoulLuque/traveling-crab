@@ -10,10 +10,8 @@ use memmap2::Mmap;
 use tsp_core::{
     instance::{
         InstanceMetadata,
-        edge::{
-            data::{EdgeDataMatrixSym, get_lower_triangle_matrix_entry_row_bigger},
-            distance::Distance,
-        },
+        distance::Distance,
+        edge::data::{EdgeDataMatrixSym, get_lower_triangle_matrix_entry_row_bigger},
     },
     tsp_lib_spec::TSPDataKeyword,
 };

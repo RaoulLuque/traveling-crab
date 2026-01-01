@@ -83,11 +83,8 @@ use std::u32;
 use log::{debug, info, trace};
 use tsp_core::instance::{
     UnTour,
-    edge::{
-        UnEdge,
-        data::EdgeDataMatrix,
-        distance::{Distance, ScaledDistance},
-    },
+    distance::{Distance, ScaledDistance},
+    edge::{UnEdge, data::EdgeDataMatrix},
     node::Node,
 };
 

@@ -1,8 +1,8 @@
 use tsp_core::instance::{
+    distance::ScaledDistance,
     edge::{
         UnEdge,
         data::{EdgeDataMatrix, EdgeDataMatrixZeroRemoved},
-        distance::ScaledDistance,
     },
     node::Node,
 };

@@ -1,3 +1,5 @@
+#![warn(missing_debug_implementations, missing_docs)]
+
 pub mod instance;
 pub mod tsp_lib_spec;
 

@@ -1,11 +1,15 @@
 use crate::{
-    instance::edge::{UnEdge, data::EdgeDataMatrixSym, distance::Distance},
+    instance::{
+        distance::Distance,
+        edge::{UnEdge, data::EdgeDataMatrixSym},
+    },
     tsp_lib_spec::{
         DisplayDataType, EdgeDataFormat, EdgeWeightFormat, EdgeWeightType, NodeCoordType,
         ProblemType,
     },
 };
 
+pub mod distance;
 pub mod edge;
 pub mod node;
 
