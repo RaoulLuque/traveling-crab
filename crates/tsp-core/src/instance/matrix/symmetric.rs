@@ -1,16 +1,16 @@
-use crate::instance::{edge::data::EdgeDataMatrix, node::Node};
+use crate::instance::{matrix::Matrix, node::Node};
 
 /// A row-major lower-triangular matrix to store arbitrary symmetric edge data.
 ///
 /// The underlying data is guaranteed to have length dimension * (dimension + 1) / 2 where dimension
 /// is the number of nodes.
 #[derive(Debug, Clone)]
-pub struct EdgeDataMatrixSym<Data> {
+pub struct MatrixSym<Data> {
     data: Vec<Data>,
     dimension: usize,
 }
 
-impl<Data> EdgeDataMatrixSym<Data> {
+impl<Data> MatrixSym<Data> {
     /// Create a new EdgeDataMatrixSym from raw data and dimension.
     ///
     /// Panics if the length of data does not equal dimension * dimension.
@@ -51,8 +51,8 @@ impl<Data> EdgeDataMatrixSym<Data> {
     /// Creates a restricted view of the first n nodes of this EdgeDataMatrixSym.
     ///
     /// Panics if n > dimension.
-    pub fn restrict_to_first_n<'a>(&'a self, n: usize) -> EDMSymViewRestricted<'a, Data> {
-        EDMSymViewRestricted {
+    pub fn restrict_to_first_n<'a>(&'a self, n: usize) -> MatrixSymViewRestricted<'a, Data> {
+        MatrixSymViewRestricted {
             data: &self.data[0..(n * (n + 1)) / 2],
             dimension: n,
         }
@@ -68,11 +68,11 @@ impl<Data> EdgeDataMatrixSym<Data> {
             .map(|(from, to)| distance_function(from, to))
             .collect();
 
-        EdgeDataMatrixSym::new(data, dimension)
+        MatrixSym::new(data, dimension)
     }
 }
 
-impl<Data: Copy> EdgeDataMatrixSym<Data> {
+impl<Data: Copy> MatrixSym<Data> {
     /// Access the data at (from, to).
     ///
     /// It might be faster to use `get_data_from_bigger` or `get_data_to_bigger` if you know
@@ -103,7 +103,7 @@ impl<Data: Copy> EdgeDataMatrixSym<Data> {
 
     /// Convert to a non-symmetric [crate::instance::edge::data::EdgeDataMatrix] by duplicating the
     /// data.
-    pub fn to_edge_data_matrix(&self) -> EdgeDataMatrix<Data> {
+    pub fn to_edge_data_matrix(&self) -> Matrix<Data> {
         let dimension = self.dimension;
         let mut data = vec![self.data[0].clone(); dimension * dimension];
         for row in 0..dimension {
@@ -113,26 +113,26 @@ impl<Data: Copy> EdgeDataMatrixSym<Data> {
                 data[column * self.dimension + row] = value;
             }
         }
-        EdgeDataMatrix::new(data, self.dimension)
+        Matrix::new(data, self.dimension)
     }
 }
 
-impl<Data: Clone> EdgeDataMatrixSym<Data> {
+impl<Data: Clone> MatrixSym<Data> {
     /// Create a new EdgeDataMatrixSym from dimension, filling all entries with the given value.
     pub fn new_from_dimension_with_value(dimension: usize, value: Data) -> Self {
         let size = (dimension * (dimension + 1)) / 2;
-        EdgeDataMatrixSym::new(vec![value; size], dimension)
+        MatrixSym::new(vec![value; size], dimension)
     }
 }
 
 /// A restricted view of an EdgeDataMatrixSym, only allowing access to the first n nodes.
 #[derive(Debug, Clone)]
-pub struct EDMSymViewRestricted<'a, Data> {
+pub struct MatrixSymViewRestricted<'a, Data> {
     data: &'a [Data],
     dimension: usize,
 }
 
-impl<'a, Data: Copy> EDMSymViewRestricted<'a, Data> {
+impl<'a, Data: Copy> MatrixSymViewRestricted<'a, Data> {
     #[inline(always)]
     pub fn get_data(&self, from: Node, to: Node) -> Data {
         debug_assert!(

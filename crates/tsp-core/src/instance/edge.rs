@@ -1,7 +1,5 @@
 use crate::instance::{distance::Distance, node::Node};
 
-pub mod data;
-
 /// An undirected edge between two nodes.
 #[derive(Debug, Clone, Copy)]
 pub struct UnEdge {

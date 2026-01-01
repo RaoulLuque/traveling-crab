@@ -2,7 +2,7 @@ use crate::instance::node::Node;
 
 pub(crate) mod symmetric;
 pub use symmetric::{
-    EdgeDataMatrixSym, get_lower_triangle_matrix_entry, get_lower_triangle_matrix_entry_row_bigger,
+    MatrixSym, get_lower_triangle_matrix_entry, get_lower_triangle_matrix_entry_row_bigger,
 };
 
 #[derive(Debug, Clone)]
@@ -12,18 +12,18 @@ pub use symmetric::{
 ///
 /// The underlying data is guaranteed to have length dimension * dimension.
 /// That is, data from node i (row) to node j (column) is at index (i * dimension + j).
-pub struct EdgeDataMatrix<Data> {
+pub struct Matrix<Data> {
     data: Vec<Data>,
     dimension: usize,
 }
 
-impl<Data> EdgeDataMatrix<Data> {
+impl<Data> Matrix<Data> {
     /// Create a new EdgeDataMatrix from raw data and dimension.
     ///
     /// Panics if the length of data does not equal dimension * dimension.
-    pub fn new(data: Vec<Data>, dimension: usize) -> EdgeDataMatrix<Data> {
+    pub fn new(data: Vec<Data>, dimension: usize) -> Matrix<Data> {
         assert_eq!(data.len(), dimension * dimension);
-        EdgeDataMatrix { data, dimension }
+        Matrix { data, dimension }
     }
 
     /// Returns the dimension of the matrix. That is, the number of nodes, rows and columns.
@@ -48,19 +48,19 @@ impl<Data> EdgeDataMatrix<Data> {
             .map(|(from, to)| distance_function(from, to))
             .collect();
 
-        EdgeDataMatrix::new(data, dimension)
+        Matrix::new(data, dimension)
     }
 }
 
-impl<Data: Clone> EdgeDataMatrix<Data> {
+impl<Data: Clone> Matrix<Data> {
     /// Create a new EdgeDataMatrix from dimension, filling all entries with the given value.
     pub fn new_from_dimension_with_value(dimension: usize, value: Data) -> Self {
         let size = dimension * dimension;
-        EdgeDataMatrix::new(vec![value; size], dimension)
+        Matrix::new(vec![value; size], dimension)
     }
 }
 
-impl<Data: Copy> EdgeDataMatrix<Data> {
+impl<Data: Copy> Matrix<Data> {
     /// Access the data at (from, to).
     #[inline(always)]
     pub fn get_data(&self, from: Node, to: Node) -> Data {
@@ -95,7 +95,7 @@ impl<Data: Copy> EdgeDataMatrix<Data> {
     }
 }
 
-impl<Data> EdgeDataMatrix<Data> {
+impl<Data> Matrix<Data> {
     /// Set data asymmetrically. That is, set only the entry in row 'from' and column 'to'.
     #[inline(always)]
     pub fn set_data(&mut self, from: Node, to: Node, data: Data) {
@@ -106,9 +106,9 @@ impl<Data> EdgeDataMatrix<Data> {
     /// Split the matrix into a zero row and a zero-removed matrix.
     ///
     /// The returned zero row is of length dimension.
-    pub fn split_first_row<'a>(&'a self) -> (&'a [Data], EDMViewZeroRemoved<'a, Data>) {
+    pub fn split_first_row<'a>(&'a self) -> (&'a [Data], MatrixViewZeroRemoved<'a, Data>) {
         let zero_row = &self.data[0..self.dimension];
-        let zero_removed = EDMViewZeroRemoved {
+        let zero_removed = MatrixViewZeroRemoved {
             data: &self.data[self.dimension..],
             dimension: self.dimension,
         };
@@ -128,12 +128,12 @@ impl<Data> EdgeDataMatrix<Data> {
 /// n. Data is borrowed from the original matrix, i.e. its lifetime is tied to that of the original
 /// matrix and immutable.
 #[derive(Debug)]
-pub struct EDMViewZeroRemoved<'a, Data> {
+pub struct MatrixViewZeroRemoved<'a, Data> {
     data: &'a [Data],
     dimension: usize,
 }
 
-impl<'a, Data: Copy> EDMViewZeroRemoved<'a, Data> {
+impl<'a, Data: Copy> MatrixViewZeroRemoved<'a, Data> {
     /// Get the adjusted dimension (i.e., n-1 if the dimension of the underlying matrix is n).
     pub fn dimension_adjusted(&self) -> usize {
         self.dimension - 1

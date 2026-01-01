@@ -1,9 +1,7 @@
 use tsp_core::instance::{
     distance::ScaledDistance,
-    edge::{
-        UnEdge,
-        data::{EDMViewZeroRemoved, EdgeDataMatrix},
-    },
+    edge::UnEdge,
+    matrix::{Matrix, MatrixViewZeroRemoved},
     node::Node,
 };
 
@@ -11,8 +9,8 @@ use crate::held_karp_mod::EdgeState;
 
 /// Compute a minimum 1-tree with given node penalties and edge states.
 pub fn min_one_tree(
-    distances_scaled: &EdgeDataMatrix<ScaledDistance>,
-    edge_states: &EdgeDataMatrix<EdgeState>,
+    distances_scaled: &Matrix<ScaledDistance>,
+    edge_states: &Matrix<EdgeState>,
     penalties: &[ScaledDistance],
 ) -> Option<Vec<UnEdge>> {
     let (distances_scaled_zero, distances_scaled_rest) = distances_scaled.split_first_row();
@@ -87,8 +85,8 @@ pub fn min_one_tree(
 ///
 /// Returns a vector of edges representing the minimum spanning tree.
 fn min_spanning_tree(
-    distances_scaled: EDMViewZeroRemoved<ScaledDistance>,
-    edge_states: EDMViewZeroRemoved<EdgeState>,
+    distances_scaled: MatrixViewZeroRemoved<ScaledDistance>,
+    edge_states: MatrixViewZeroRemoved<EdgeState>,
     penalties: &[ScaledDistance],
 ) -> Option<Vec<UnEdge>> {
     let number_of_nodes_in_tree = distances_scaled.dimension_adjusted();
@@ -174,14 +172,14 @@ fn min_spanning_tree(
 #[cfg(test)]
 mod tests {
 
-    use tsp_core::instance::edge::data::EdgeDataMatrix;
+    use tsp_core::instance::matrix::Matrix;
 
     use super::*;
 
     #[test]
     fn test_min_spanning_tree_simple_tree() {
         let dimension = 11;
-        let distance_matrix = EdgeDataMatrix::new_from_distance_function(dimension, |from, to| {
+        let distance_matrix = Matrix::new_from_distance_function(dimension, |from, to| {
             if from.0 + 1 == to.0 || from.0 == to.0 + 1 {
                 ScaledDistance(0)
             } else {
@@ -189,7 +187,7 @@ mod tests {
             }
         });
         let penalties = vec![ScaledDistance(0); dimension];
-        let edge_states = EdgeDataMatrix::new_from_dimension_with_value(
+        let edge_states = Matrix::new_from_dimension_with_value(
             distance_matrix.dimension(),
             EdgeState::Available,
         );
@@ -215,12 +213,10 @@ mod tests {
 
     #[test]
     fn test_min_spanning_tree_excluded_infeasible() {
-        let distance_matrix = EdgeDataMatrix::new_from_dimension_with_value(10, ScaledDistance(0));
+        let distance_matrix = Matrix::new_from_dimension_with_value(10, ScaledDistance(0));
         let penalties = vec![ScaledDistance(0); 10];
-        let edge_states = EdgeDataMatrix::new_from_dimension_with_value(
-            distance_matrix.dimension(),
-            EdgeState::Excluded,
-        );
+        let edge_states =
+            Matrix::new_from_dimension_with_value(distance_matrix.dimension(), EdgeState::Excluded);
         let (_, distance_matrix_rest) = distance_matrix.split_first_row();
         let (_, edge_states_rest) = edge_states.split_first_row();
 
@@ -231,11 +227,10 @@ mod tests {
     #[test]
     fn test_min_spanning_tree_infeasible_node_isolated() {
         let dimension = 6;
-        let distance_matrix =
-            EdgeDataMatrix::new_from_dimension_with_value(dimension, ScaledDistance(0));
+        let distance_matrix = Matrix::new_from_dimension_with_value(dimension, ScaledDistance(0));
         let penalties = vec![ScaledDistance(0); dimension];
         let mut edge_states =
-            EdgeDataMatrix::new_from_dimension_with_value(dimension, EdgeState::Available);
+            Matrix::new_from_dimension_with_value(dimension, EdgeState::Available);
         for from in 0..dimension {
             for to in 0..=from {
                 if (from == 2) || (to == 2) {
@@ -258,11 +253,10 @@ mod tests {
     #[test]
     fn test_min_spanning_tree_fixed() {
         let dimension = 6;
-        let distance_matrix =
-            EdgeDataMatrix::new_from_dimension_with_value(dimension, ScaledDistance(0));
+        let distance_matrix = Matrix::new_from_dimension_with_value(dimension, ScaledDistance(0));
         let penalties = vec![ScaledDistance(0); dimension];
         let mut edge_states =
-            EdgeDataMatrix::new_from_dimension_with_value(dimension, EdgeState::Available);
+            Matrix::new_from_dimension_with_value(dimension, EdgeState::Available);
         for from in 0..dimension {
             for to in 0..=from {
                 if to + 1 == from {

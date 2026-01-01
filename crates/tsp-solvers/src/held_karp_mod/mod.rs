@@ -84,7 +84,8 @@ use log::{debug, info, trace};
 use tsp_core::instance::{
     UnTour,
     distance::{Distance, ScaledDistance},
-    edge::{UnEdge, data::EdgeDataMatrix},
+    edge::UnEdge,
+    matrix::Matrix,
     node::Node,
 };
 
@@ -96,14 +97,14 @@ mod trees;
 ///
 /// For a detailed explanation of the algorithm, see the [module-level
 /// documentation][crate::held_karp_mod].
-pub fn held_karp(distances: &EdgeDataMatrix<Distance>) -> Option<UnTour> {
+pub fn held_karp(distances: &Matrix<Distance>) -> Option<UnTour> {
     info!("Starting Held-Karp solver for instance");
-    let mut edge_states = EdgeDataMatrix::new(
+    let mut edge_states = Matrix::new(
         vec![EdgeState::Available; distances.data().len()],
         distances.dimension(),
     );
 
-    let scaled_distances = EdgeDataMatrix::new(
+    let scaled_distances = Matrix::new(
         distances
             .data()
             .iter()
@@ -173,9 +174,9 @@ pub enum EdgeState {
 /// TODO: Summarize arguments in Held-Karp State Struct or Smth
 /// TODO: Possibly remove upper_bound as best_tour.cost already contains that information
 fn explore_node(
-    distances: &EdgeDataMatrix<Distance>,
-    scaled_distances: &EdgeDataMatrix<ScaledDistance>,
-    edge_states: &mut EdgeDataMatrix<EdgeState>,
+    distances: &Matrix<Distance>,
+    scaled_distances: &Matrix<ScaledDistance>,
+    edge_states: &mut Matrix<EdgeState>,
     node_penalties: &mut [ScaledDistance],
     fixed_degrees: &mut [u32],
     upper_bound: &mut Distance,
@@ -304,9 +305,9 @@ enum LowerBoundOutput {
 
 /// Compute Held-Karp lower bound using 1-trees and Lagrangian relaxation
 fn held_karp_lower_bound(
-    distances: &EdgeDataMatrix<Distance>,
-    scaled_distances: &EdgeDataMatrix<ScaledDistance>,
-    edge_states: &EdgeDataMatrix<EdgeState>,
+    distances: &Matrix<Distance>,
+    scaled_distances: &Matrix<ScaledDistance>,
+    edge_states: &Matrix<EdgeState>,
     node_penalties: &mut [ScaledDistance],
     upper_bound: Distance,
     max_iterations: usize,
@@ -422,8 +423,8 @@ fn held_karp_lower_bound(
 /// The edge with the minimum reduced cost (edge_cost - node_penalties[from] - node_penalties[to])
 /// among available edges is selected for branching.
 fn edge_to_branch_on(
-    scaled_distances: &EdgeDataMatrix<ScaledDistance>,
-    edge_states: &EdgeDataMatrix<EdgeState>,
+    scaled_distances: &Matrix<ScaledDistance>,
+    edge_states: &Matrix<EdgeState>,
     node_penalties: &[ScaledDistance],
     one_tree: &[UnEdge],
 ) -> Option<UnEdge> {
@@ -449,7 +450,7 @@ fn edge_to_branch_on(
 ///
 /// Node penalties are set to half the minimum distances to other nodes.
 fn initial_penalties(
-    scaled_distances: &EdgeDataMatrix<ScaledDistance>,
+    scaled_distances: &Matrix<ScaledDistance>,
     dimension: usize,
 ) -> Vec<ScaledDistance> {
     let mut penalties = vec![ScaledDistance::MAX; dimension];
