@@ -5,7 +5,7 @@ use std::{
     path::Path,
 };
 
-use tsp_core::instance::edge::distance::Distance;
+use tsp_core::instance::distance::Distance;
 
 fn check_input_file_against_golden_file(file_name: &str) {
     let input_instance =
