@@ -181,14 +181,13 @@ mod tests {
     #[test]
     fn test_min_spanning_tree_simple_tree() {
         let dimension = 11;
-        let distance_matrix =
-            EdgeDataMatrix::slow_new_from_distance_function(dimension, |from, to| {
-                if from.0 + 1 == to.0 || from.0 == to.0 + 1 {
-                    ScaledDistance(0)
-                } else {
-                    ScaledDistance(1)
-                }
-            });
+        let distance_matrix = EdgeDataMatrix::new_from_distance_function(dimension, |from, to| {
+            if from.0 + 1 == to.0 || from.0 == to.0 + 1 {
+                ScaledDistance(0)
+            } else {
+                ScaledDistance(1)
+            }
+        });
         let penalties = vec![ScaledDistance(0); dimension];
         let edge_states = EdgeDataMatrix::new_from_dimension_with_value(
             distance_matrix.dimension(),

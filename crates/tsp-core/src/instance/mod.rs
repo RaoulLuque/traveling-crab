@@ -28,7 +28,7 @@ impl TSPSymInstance {
         let dimension = metadata.dimension;
         Self {
             metadata,
-            distances: EdgeDataMatrixSym::new_from_data(distance_data, dimension),
+            distances: EdgeDataMatrixSym::new(distance_data, dimension),
         }
     }
 

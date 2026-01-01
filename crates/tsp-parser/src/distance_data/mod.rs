@@ -8,7 +8,11 @@
 use memchr::memchr;
 use memmap2::Mmap;
 use tsp_core::{
-    instance::{InstanceMetadata, distance::Distance, edge::data::{EdgeDataMatrixSym, get_lower_triangle_matrix_entry_row_bigger}},
+    instance::{
+        InstanceMetadata,
+        distance::Distance,
+        edge::data::{EdgeDataMatrixSym, get_lower_triangle_matrix_entry_row_bigger},
+    },
     tsp_lib_spec::TSPDataKeyword,
 };
 
@@ -141,7 +145,7 @@ fn distances_euclidean(point_data: &[(f64, f64)], dimension: usize) -> EdgeDataM
         });
     }
 
-    EdgeDataMatrixSym::new_from_data(distance_data, dimension)
+    EdgeDataMatrixSym::new(distance_data, dimension)
 }
 
 #[inline(always)]

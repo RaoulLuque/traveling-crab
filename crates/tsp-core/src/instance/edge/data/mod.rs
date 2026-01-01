@@ -2,8 +2,7 @@ use crate::instance::node::Node;
 
 pub(crate) mod symmetric;
 pub use symmetric::{
-    EdgeDataMatrixSym, get_lower_triangle_matrix_entry,
-    get_lower_triangle_matrix_entry_column_bigger, get_lower_triangle_matrix_entry_row_bigger,
+    EdgeDataMatrixSym, get_lower_triangle_matrix_entry, get_lower_triangle_matrix_entry_row_bigger,
 };
 
 #[derive(Debug, Clone)]
@@ -35,6 +34,21 @@ impl<Data> EdgeDataMatrix<Data> {
     /// Returns a reference to the underlying data vector.
     pub fn data(&self) -> &[Data] {
         &self.data
+    }
+
+    /// Create a new EdgeDataMatrix from a distance function.
+    ///
+    /// The distance function must not necessarily be symmetric.
+    pub fn new_from_distance_function(
+        dimension: usize,
+        distance_function: impl Fn(Node, Node) -> Data,
+    ) -> Self {
+        let data: Vec<_> = (0..dimension)
+            .flat_map(|row| (0..dimension).map(move |column| (Node(row), Node(column))))
+            .map(|(from, to)| distance_function(from, to))
+            .collect();
+
+        EdgeDataMatrix::new(data, dimension)
     }
 }
 
@@ -108,25 +122,6 @@ impl<Data> EdgeDataMatrix<Data> {
     #[inline(always)]
     fn get_index(&self, from: Node, to: Node) -> usize {
         from.0 * self.dimension + to.0
-    }
-}
-
-impl<Data: Default + Clone + Copy> EdgeDataMatrix<Data> {
-    /// Create a new EdgeDataMatrix from a distance function.
-    ///
-    /// The distance function must not necessarily be symmetric.
-    pub fn slow_new_from_distance_function(
-        dimension: usize,
-        mut distance_function: impl FnMut(Node, Node) -> Data,
-    ) -> Self {
-        let mut res = EdgeDataMatrix::new_from_dimension_with_value(dimension, Data::default());
-        for row in 0..dimension {
-            for column in 0..dimension {
-                let distance = distance_function(Node(row), Node(column));
-                res.set_data(Node(row), Node(column), distance);
-            }
-        }
-        res
     }
 }
 
