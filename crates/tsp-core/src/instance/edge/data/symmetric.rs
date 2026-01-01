@@ -135,16 +135,14 @@ pub struct EDMSymViewRestricted<'a, Data> {
 impl<'a, Data: Copy> EDMSymViewRestricted<'a, Data> {
     #[inline(always)]
     pub fn get_data(&self, from: Node, to: Node) -> Data {
-        let index = get_lower_triangle_matrix_entry(from.0, to.0);
         debug_assert!(
-            index < self.data.len(),
-            "Index out of bounds in RestrictedDataMatrixSym: index {}, data length {}, from {:?}, \
-             to {:?}",
-            index,
-            self.data.len(),
+            from.0 < self.dimension && to.0 < self.dimension,
+            "Accessing out of bounds in RestrictedDataMatrixSym: from {:?}, to {:?}, dimension {}",
             from,
-            to
+            to,
+            self.dimension
         );
+        let index = get_lower_triangle_matrix_entry(from.0, to.0);
         self.data[index]
     }
 
@@ -153,6 +151,13 @@ impl<'a, Data: Copy> EDMSymViewRestricted<'a, Data> {
     /// May return wrong data, if 'from' is smaller than 'to'.
     #[inline(always)]
     pub fn get_data_from_bigger(&self, from: Node, to: Node) -> Data {
+        debug_assert!(
+            from.0 < self.dimension && to.0 < self.dimension,
+            "Accessing out of bounds in RestrictedDataMatrixSym: from {:?}, to {:?}, dimension {}",
+            from,
+            to,
+            self.dimension
+        );
         let index = get_lower_triangle_matrix_entry_row_bigger(from.0, to.0);
         self.data[index]
     }
@@ -162,6 +167,13 @@ impl<'a, Data: Copy> EDMSymViewRestricted<'a, Data> {
     /// May return wrong data, if 'to' is smaller than 'from'.
     #[inline(always)]
     pub fn get_data_to_bigger(&self, from: Node, to: Node) -> Data {
+        debug_assert!(
+            from.0 < self.dimension && to.0 < self.dimension,
+            "Accessing out of bounds in RestrictedDataMatrixSym: from {:?}, to {:?}, dimension {}",
+            from,
+            to,
+            self.dimension
+        );
         self.get_data_from_bigger(to, from)
     }
 }

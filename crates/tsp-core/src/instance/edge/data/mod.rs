@@ -56,10 +56,7 @@ impl<Data: Clone> EdgeDataMatrix<Data> {
     /// Create a new EdgeDataMatrix from dimension, filling all entries with the given value.
     pub fn new_from_dimension_with_value(dimension: usize, value: Data) -> Self {
         let size = dimension * dimension;
-        Self {
-            data: vec![value; size],
-            dimension,
-        }
+        EdgeDataMatrix::new(vec![value; size], dimension)
     }
 }
 
