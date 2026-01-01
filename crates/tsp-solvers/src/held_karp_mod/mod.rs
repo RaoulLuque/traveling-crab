@@ -88,7 +88,7 @@ use tsp_core::instance::{
     node::Node,
 };
 
-use crate::held_karp_mod::trees::min_one_tree;
+pub use crate::held_karp_mod::trees::min_one_tree;
 
 mod trees;
 
@@ -157,7 +157,7 @@ const BETA: f64 = 0.9;
 #[repr(i8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// State of an edge in the branch-and-bound search.
-enum EdgeState {
+pub enum EdgeState {
     /// Edge is available for inclusion or exclusion, i.e. not yet decided.
     Available = 1,
     /// Edge is currently excluded from the tour and thus 1-trees / spanning trees.
