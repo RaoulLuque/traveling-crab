@@ -26,12 +26,15 @@ impl<Data> Matrix<Data> {
         Matrix { data, dimension }
     }
 
-    /// Returns the dimension of the matrix. That is, the number of nodes, rows and columns.
+    /// Returns the dimension of the matrix. That is, the number of nodes, which is the same as the
+    /// number of rows and columns.
     pub fn dimension(&self) -> usize {
         self.dimension
     }
 
-    /// Returns a reference to the underlying data vector.
+    /// Returns a reference to the underlying data.
+    ///
+    /// It is guaranteed that the length of the data is dimension * dimension.
     pub fn data(&self) -> &[Data] {
         &self.data
     }
