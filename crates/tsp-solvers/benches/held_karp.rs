@@ -1,5 +1,6 @@
 use concorde_rs::solver::tsp_hk;
 use criterion::{Criterion, criterion_group, criterion_main};
+use tsp_core::instance::{distance::Distance, matrix::MatrixSym};
 use tsp_parser::parse_tsp_instance;
 use tsp_solvers::held_karp;
 
@@ -22,8 +23,10 @@ macro_rules! create_held_karp_benchmarks {
         }
 
         fn $name_own(c: &mut Criterion) {
-            let tsp_instance = parse_tsp_instance(concat!("../../instances/", $file_path)).unwrap();
-            let non_symmetric_matrix = tsp_instance.distances().to_edge_data_matrix();
+            let tsp_instance =
+                parse_tsp_instance::<MatrixSym<Distance>>(concat!("../../instances/", $file_path))
+                    .unwrap();
+            let non_symmetric_matrix = tsp_instance.distance_matrix().to_edge_data_matrix();
 
             c.bench_function(
                 concat!("Held Karp using own implementation: ", $file_path),
