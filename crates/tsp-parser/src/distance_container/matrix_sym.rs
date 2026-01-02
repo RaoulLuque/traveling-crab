@@ -5,7 +5,6 @@ use tsp_core::instance::{
 };
 
 use super::ParseFromTSPLib;
-use crate::data_section::{GeoPoint, Point2D};
 
 // TODO: Add more fine grained benchmarks to determine optimal parallelism bound
 const PARALLELISM_BOUND: usize = 300_000;

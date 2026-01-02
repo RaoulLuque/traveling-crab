@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 
-use tsp_core::{instance::distance::Distance, tsp_lib_spec::EdgeWeightType};
+use tsp_core::instance::distance::Distance;
 
 use crate::data_section::{GeoPoint, Point2D, Point3D};
 

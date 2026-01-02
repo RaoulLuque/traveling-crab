@@ -1,6 +1,5 @@
 use tsp_core::instance::{InstanceMetadata, distance::Distance};
 
-use crate::data_section::{GeoPoint, Point2D};
 
 mod matrix_sym;
 

@@ -1,10 +1,9 @@
 use tsp_core::instance::{distance::Distance, matrix::MatrixSym};
-use tsp_solvers::held_karp;
 
 fn main() {
     env_logger::init();
 
-    let tsp_instance = tsp_parser::parse_tsp_instance::<MatrixSym<Distance>>(
+    let _tsp_instance = tsp_parser::parse_tsp_instance::<MatrixSym<Distance>>(
         "instances/tsplib_symmetric/d18512.tsp",
     )
     .unwrap();
