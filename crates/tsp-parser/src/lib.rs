@@ -5,13 +5,13 @@ use thiserror::Error;
 use tsp_core::instance::TSPSymInstance;
 
 use crate::{
-    distance_container::ParseFromTSPLib,
     data_section::parse_data_sections,
+    distance_container::ParseFromTSPLib,
     metadata::{MetaDataParseError, parse_metadata},
 };
 
-pub mod distance_container;
 pub mod data_section;
+pub mod distance_container;
 pub mod metadata;
 
 #[derive(Error, Debug)]

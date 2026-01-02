@@ -7,15 +7,12 @@
 /// carried out in double precision arithmetic, i.e. `f64` in Rust.
 use memchr::memchr;
 use memmap2::Mmap;
-use tsp_core::{
-    instance::InstanceMetadata,
-    tsp_lib_spec::TSPDataKeyword,
-};
+use tsp_core::{instance::InstanceMetadata, tsp_lib_spec::TSPDataKeyword};
 
 pub(crate) mod distance_function;
 
 use crate::{
-    distance_container::ParseFromTSPLib, data_section::distance_function::get_distance_function,
+    data_section::distance_function::get_distance_function, distance_container::ParseFromTSPLib,
 };
 
 pub fn parse_data_sections<DistanceContainer: ParseFromTSPLib>(

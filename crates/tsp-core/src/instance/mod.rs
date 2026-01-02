@@ -1,9 +1,5 @@
 use crate::{
-    instance::{
-        distance::Distance,
-        edge::UnEdge,
-        matrix::MatrixSym,
-    },
+    instance::{distance::Distance, edge::UnEdge, matrix::MatrixSym},
     tsp_lib_spec::{
         DisplayDataType, EdgeDataFormat, EdgeWeightFormat, EdgeWeightType, NodeCoordType,
         ProblemType,
