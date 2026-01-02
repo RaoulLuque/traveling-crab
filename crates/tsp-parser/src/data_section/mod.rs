@@ -15,6 +15,13 @@ use crate::{
     data_section::distance_function::get_distance_function, distance_container::ParseFromTSPLib,
 };
 
+/// A simple 2D point representation.
+#[derive(Debug, Clone, Copy)]
+pub struct Point2D {
+    pub x: f64,
+    pub y: f64,
+}
+
 pub fn parse_data_sections<DistanceContainer: ParseFromTSPLib>(
     mmap: &Mmap,
     index_in_map: &mut usize,
@@ -35,8 +42,8 @@ fn parse_node_coord_section(
     mmap: &Mmap,
     index_in_map: &mut usize,
     metadata: &InstanceMetadata,
-) -> Vec<(f64, f64)> {
-    let mut point_data: Vec<(f64, f64)> = Vec::with_capacity(metadata.dimension);
+) -> Vec<Point2D> {
+    let mut point_data: Vec<Point2D> = Vec::with_capacity(metadata.dimension);
 
     // Read a line to test if the point data is floating point or integer
     let is_float_data = {
@@ -96,7 +103,7 @@ fn parse_node_coord_section(
             )
         };
 
-        point_data.push((x, y));
+        point_data.push(Point2D { x, y });
     }
 
     point_data
