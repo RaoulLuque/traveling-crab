@@ -4,23 +4,6 @@ use tsp_core::{instance::distance::Distance, tsp_lib_spec::EdgeWeightType};
 
 use crate::data_section::{GeoPoint, Point2D, Point3D};
 
-pub fn get_2d_distance_function(
-    edge_weight_type: &EdgeWeightType,
-) -> impl Fn(&Point2D, &Point2D) -> Distance + Send + Sync + Copy {
-    use EdgeWeightType::*;
-    match edge_weight_type {
-        EUC_2D => euclidean_distance_2d,
-        MAX_2D => max_distance_2d,
-        MAN_2D => manhattan_distance_2d,
-        CEIL_2D => ceil_distance_2d,
-        ATT => att_distance_2d,
-        _ => unreachable!(
-            "Distance function for edge weight type {:?} is not 2D.",
-            edge_weight_type
-        ),
-    }
-}
-
 /// Computes the 2D Euclidean distance between two points as defined in TSPLIB95.
 #[inline(always)]
 pub fn euclidean_distance_2d(point_a: &Point2D, point_b: &Point2D) -> Distance {

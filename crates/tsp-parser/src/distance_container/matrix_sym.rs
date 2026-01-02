@@ -11,28 +11,16 @@ use crate::data_section::{GeoPoint, Point2D};
 const PARALLELISM_BOUND: usize = 300_000;
 
 impl ParseFromTSPLib for MatrixSym<Distance> {
-    fn from_2d_node_coord_section(
-        node_data: &Vec<Point2D>,
+    fn from_node_coord_section<PointType: Sync + Send>(
+        node_data: &Vec<PointType>,
         metadata: &InstanceMetadata,
-        distance_function: impl Fn(&Point2D, &Point2D) -> Distance + Sync + Send + Copy,
+        distance_function: impl Fn(&PointType, &PointType) -> Distance + Sync + Send + Copy,
     ) -> Self {
-        compute_dists_from_node_coords::<Point2D>(&node_data, metadata.dimension, distance_function)
-    }
-
-    fn from_geo_node_coord_section(
-        node_data: &Vec<GeoPoint>,
-        metadata: &InstanceMetadata,
-        distance_function: impl Fn(&GeoPoint, &GeoPoint) -> Distance + Sync + Send + Copy,
-    ) -> Self {
-        compute_dists_from_node_coords::<GeoPoint>(
-            &node_data,
-            metadata.dimension,
-            distance_function,
-        )
+        compute_dists_from_node_coords(&node_data, metadata.dimension, distance_function)
     }
 }
 
-fn compute_dists_from_node_coords<PointType: Send + Sync + Copy>(
+fn compute_dists_from_node_coords<PointType: Send + Sync>(
     point_data: &[PointType],
     dimension: usize,
     distance_function: impl Fn(&PointType, &PointType) -> Distance + Sync + Send + Copy,
@@ -69,7 +57,7 @@ fn compute_dists_from_node_coords<PointType: Send + Sync + Copy>(
 }
 
 #[inline(always)]
-fn compute_dists_from_node_coords_chunk<PointType: Copy>(
+fn compute_dists_from_node_coords_chunk<PointType>(
     chunk: &mut [Distance],
     point_data: &[PointType],
     chunk_start_index: usize,
@@ -143,7 +131,7 @@ fn compute_dists_from_node_coords_chunk<PointType: Copy>(
 }
 
 #[inline(always)]
-fn compute_and_set_distance<PointType: Copy>(
+fn compute_and_set_distance<PointType>(
     chunk: &mut [Distance],
     row: usize,
     column: usize,
