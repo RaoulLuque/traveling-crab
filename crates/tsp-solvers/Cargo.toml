@@ -23,6 +23,9 @@ concorde_rs ={ workspace = true}
 
 tsp-parser = {workspace = true}
 
+[features]
+miri = ["tsp-parser/miri"]
+
 [[bench]]
 name = "one_tree"
 harness = false

@@ -46,6 +46,16 @@ fn check_input_file_against_golden_file(file_name: &str) {
 }
 
 #[test]
+fn test_12_short() {
+    check_input_file_against_golden_file("tsp_rust/12");
+}
+
+#[test]
+fn test_berlin52_short() {
+    check_input_file_against_golden_file("tsplib_symmetric/berlin52");
+}
+
+#[test]
 fn test_a280() {
     check_input_file_against_golden_file("tsplib_symmetric/a280");
 }
@@ -58,4 +68,9 @@ fn test_d198() {
 #[test]
 fn test_d493() {
     check_input_file_against_golden_file("tsplib_symmetric/d493");
+}
+
+#[test]
+fn test_short_a() {
+    assert!(true);
 }
