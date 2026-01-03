@@ -70,16 +70,13 @@ jobs:
       - name: Build caching
         uses: Swatinem/rust-cache@v2
 
-      - name: Change into the current crate directory
-        run: cd crates/${{ matrix.crate }}
-
       - name: Run miri
         if: ${{ matrix.crate != 'tsp-parser' }}
         run: |
-          MIRIFLAGS=-Zmiri-disable-isolation cargo miri nextest run --features miri
+          MIRIFLAGS=-Zmiri-disable-isolation cargo miri nextest run --features miri --package ${{ matrix.crate }}
         
       - name: Run miri for tsp-parser
         if: ${{ matrix.crate == 'tsp-parser' }}
         run: |
           # tsp-parser has some very long-running tests (IO-Heavy), so we only run a short subset under Miri
-          MIRIFLAGS=-Zmiri-disable-isolation cargo miri nextest run --features miri -E 'test(short)'
+          MIRIFLAGS=-Zmiri-disable-isolation cargo miri nextest run --features miri -E 'test(short)' --package "tsp-parser"
