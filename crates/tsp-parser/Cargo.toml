@@ -26,5 +26,5 @@ criterion = {workspace = true}
 _miri = []
 
 [[bench]]
-name = "parse_and_compute_dist"
+name = "parse_into_matrix"
 harness = false
