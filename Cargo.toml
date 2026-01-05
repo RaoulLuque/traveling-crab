@@ -27,6 +27,7 @@ thiserror = "2.0.17"
 tsp-core = {path = "crates/tsp-core"}
 tsp-parser = {path = "crates/tsp-parser"}
 tsp-solvers = {path = "crates/tsp-solvers"}
+tsp-macros = {path = "crates/tsp-macros"}
 
 
 [profile.dev]
