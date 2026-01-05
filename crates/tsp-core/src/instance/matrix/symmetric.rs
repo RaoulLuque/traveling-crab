@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::instance::{matrix::Matrix, node::Node};
 
 /// A row-major lower-triangular matrix to store arbitrary symmetric edge data.
@@ -122,6 +124,25 @@ impl<Data: Clone> MatrixSym<Data> {
     pub fn new_from_dimension_with_value(dimension: usize, value: Data) -> Self {
         let size = (dimension * (dimension + 1)) / 2;
         MatrixSym::new(vec![value; size], dimension)
+    }
+}
+
+impl<Data: Display + Ord + Copy> Display for MatrixSym<Data> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let max_value = self
+            .data
+            .iter()
+            .max()
+            .expect("MatrixSym should have at least one entry for display");
+        let max_len = format!("{}", max_value).len();
+        for row in 0..self.dimension {
+            for column in 0..row {
+                let value = self.get_data_from_bigger(Node(row), Node(column));
+                write!(f, "{:max_len$} ", value)?;
+            }
+            writeln!(f)?;
+        }
+        Ok(())
     }
 }
 

@@ -1,4 +1,5 @@
 use std::{
+    fmt::Display,
     iter::Sum,
     ops::{Add, AddAssign, Mul, Sub},
 };
@@ -54,5 +55,12 @@ impl Mul<Distance> for i32 {
 
     fn mul(self, rhs: Distance) -> Self::Output {
         Distance(self * rhs.0)
+    }
+}
+
+impl Display for Distance {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = self.0.to_string();
+        f.pad(&s)
     }
 }

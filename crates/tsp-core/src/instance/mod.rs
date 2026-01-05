@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::{
     instance::{distance::Distance, edge::UnEdge, matrix::MatrixSym},
     tsp_lib_spec::{
@@ -42,6 +44,17 @@ impl TSPSymInstance<MatrixSym<Distance>> {
 
     pub fn distance_matrix(&self) -> &MatrixSym<Distance> {
         &self.distances
+    }
+}
+
+impl<DistanceContainer: Display> Display for TSPSymInstance<DistanceContainer> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "TSP Instance: {}", self.metadata.name)?;
+        writeln!(f, "Type: {:?}", self.metadata.problem_type)?;
+        writeln!(f, "Dimension: {}", self.metadata.dimension)?;
+        writeln!(f, "Edge Weight Type: {:?}", self.metadata.edge_weight_type)?;
+        writeln!(f, "Distance Matrix:\n{}", self.distances)?;
+        Ok(())
     }
 }
 

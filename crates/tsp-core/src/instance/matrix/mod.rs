@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::instance::node::Node;
 
 pub(crate) mod symmetric;
@@ -122,6 +124,26 @@ impl<Data> Matrix<Data> {
     #[inline(always)]
     fn get_index(&self, from: Node, to: Node) -> usize {
         from.0 * self.dimension + to.0
+    }
+}
+
+impl<Data: Display + Ord + Copy> Display for Matrix<Data> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let max_value = self
+            .data
+            .iter()
+            .max()
+            .expect("Matrix should have at least one entry for display");
+        let max_len = format!("{}", max_value).len();
+        println!("Max len   : {}", max_len);
+        for row in 0..self.dimension {
+            for column in 0..self.dimension {
+                let value = self.get_data(Node(row), Node(column));
+                write!(f, "{:max_len$} ", value)?;
+            }
+            writeln!(f)?;
+        }
+        Ok(())
     }
 }
 
