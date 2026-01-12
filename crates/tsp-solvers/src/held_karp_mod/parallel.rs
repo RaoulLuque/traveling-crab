@@ -152,15 +152,13 @@ fn explore_node_new_thread(
         return;
     };
 
-    if *threads_spawned.lock().unwrap() <= 8 {
-        if (fixed_degrees[branching_edge.from.0] < 2) && (fixed_degrees[branching_edge.to.0] < 2) {
-            let mut threads_spawned_guard = threads_spawned.lock().unwrap();
-            *threads_spawned_guard += 1;
-            drop(threads_spawned_guard);
+    if (fixed_degrees[branching_edge.from.0] < 2) && (fixed_degrees[branching_edge.to.0] < 2) {
+        if *threads_spawned.lock().unwrap() <= 8 {
+            // We can spawn a new thread which explores the branch excluding the edge
+            *threads_spawned.lock().unwrap() += 1;
             thread::scope(|s| {
                 // Explore the branch excluding the edge
                 {
-                    println!("Spawning thread at depth {}", depth);
                     let mut edge_states_clone = edge_states.clone();
                     let mut node_penalties_clone = node_penalties.to_vec();
                     let mut fixed_degrees_clone = fixed_degrees.to_vec();
@@ -192,7 +190,7 @@ fn explore_node_new_thread(
                 // Try exploring the branch including the edge.
                 // That is, we might not be able to explore this branch, if we the edge inclusion
                 // would violate the already fixed degrees / edges.
-                println!("Exploring inclusion at depth {}", depth);
+                // println!("Exploring inclusion at depth {}", depth);
                 edge_states.set_data_symmetric(
                     branching_edge.from,
                     branching_edge.to,
@@ -224,12 +222,10 @@ fn explore_node_new_thread(
                 fixed_degrees[branching_edge.to.0] -= 1;
 
                 // Decrement the thread count
-                // *threads_spawned.lock().unwrap() -= 1
-
-                println!("Joining thread at depth {}", depth);
+                *threads_spawned.lock().unwrap() -= 1;
             });
         } else {
-            // Explore the branch excluding the edge
+            // We cannot spawn a new thread, so we explore both branches in the current thread
             {
                 edge_states.set_data_symmetric(
                     branching_edge.from,
@@ -247,13 +243,49 @@ fn explore_node_new_thread(
                     bb_counter,
                     bb_limit,
                     depth + 1,
-                    threads_spawned,
+                    threads_spawned.clone(),
                 );
+            }
+
+            // Try exploring the branch including the edge.
+            // That is, we might not be able to explore this branch, if we the edge inclusion would
+            // violate the already fixed degrees / edges.
+            if (fixed_degrees[branching_edge.from.0] < 2)
+                && (fixed_degrees[branching_edge.to.0] < 2)
+            {
+                edge_states.set_data_symmetric(
+                    branching_edge.from,
+                    branching_edge.to,
+                    EdgeState::Fixed,
+                );
+                fixed_degrees[branching_edge.from.0] += 1;
+                fixed_degrees[branching_edge.to.0] += 1;
+
+                explore_node_new_thread(
+                    distances,
+                    scaled_distances,
+                    edge_states,
+                    node_penalties,
+                    fixed_degrees,
+                    best_tour,
+                    bb_counter,
+                    bb_limit,
+                    depth + 1,
+                    threads_spawned.clone(),
+                );
+
+                // Backtrack
+                edge_states.set_data_symmetric(
+                    branching_edge.from,
+                    branching_edge.to,
+                    EdgeState::Available,
+                );
+                fixed_degrees[branching_edge.from.0] -= 1;
+                fixed_degrees[branching_edge.to.0] -= 1;
             }
         }
     } else {
-        println!("Continuing sequentially at depth {}", depth);
-        // Explore the branch excluding the edge
+        // We can only explore the branch excluding the edge.
         {
             edge_states.set_data_symmetric(
                 branching_edge.from,
@@ -261,7 +293,7 @@ fn explore_node_new_thread(
                 EdgeState::Excluded,
             );
 
-            explore_node_parallel(
+            explore_node_new_thread(
                 distances,
                 scaled_distances,
                 edge_states,
@@ -271,41 +303,8 @@ fn explore_node_new_thread(
                 bb_counter,
                 bb_limit,
                 depth + 1,
+                threads_spawned,
             );
-        }
-
-        // Try exploring the branch including the edge.
-        // That is, we might not be able to explore this branch, if we the edge inclusion would
-        // violate the already fixed degrees / edges.
-        if (fixed_degrees[branching_edge.from.0] < 2) && (fixed_degrees[branching_edge.to.0] < 2) {
-            edge_states.set_data_symmetric(
-                branching_edge.from,
-                branching_edge.to,
-                EdgeState::Fixed,
-            );
-            fixed_degrees[branching_edge.from.0] += 1;
-            fixed_degrees[branching_edge.to.0] += 1;
-
-            explore_node_parallel(
-                distances,
-                scaled_distances,
-                edge_states,
-                node_penalties,
-                fixed_degrees,
-                best_tour,
-                bb_counter,
-                bb_limit,
-                depth + 1,
-            );
-
-            // Backtrack
-            edge_states.set_data_symmetric(
-                branching_edge.from,
-                branching_edge.to,
-                EdgeState::Available,
-            );
-            fixed_degrees[branching_edge.from.0] -= 1;
-            fixed_degrees[branching_edge.to.0] -= 1;
         }
     }
 }
