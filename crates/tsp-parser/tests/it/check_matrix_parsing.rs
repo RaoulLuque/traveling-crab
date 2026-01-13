@@ -20,7 +20,7 @@ fn check_input_file_against_golden_file(file_name: &str) {
             .expect("Matrix parsing should succeed");
     let golden_distance_data = BufReader::new(
         File::open(
-            "tests/test_assets/distances/".to_owned()
+            "tests/test_assets/symmetric_matrices/".to_owned()
                 + file_name.split("/").last().unwrap()
                 + ".txt",
         )

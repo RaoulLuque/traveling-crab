@@ -83,18 +83,18 @@ pub fn geographical_distance(point_a: &GeoPoint, point_b: &GeoPoint) -> Distance
     let q2 = (point_a.latitude - point_b.latitude).cos();
     let q3 = (point_a.latitude + point_b.latitude).cos();
 
-    Distance((rrr * ((0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)).acos() + 1.0)) as i32)
+    Distance(((rrr * (0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)).acos()) + 1.0) as i32)
 }
 
 /// Converts a 2D point representing geographical coordinates as defined in TSPLIB95.
 pub fn convert_to_geo_coordinates(point: &Point2D) -> GeoPoint {
     let deg_lat = nint(point.x) as f64;
     let min_lat = point.x - deg_lat;
-    let latitude = PI * (deg_lat + (5.0 * min_lat) / 3.0) / 180.0;
+    let latitude = PI * (deg_lat + ((5.0 * min_lat) / 3.0)) / 180.0;
 
-    let deg_lon = point.y.floor();
+    let deg_lon = nint(point.y) as f64;
     let min_lon = point.y - deg_lon;
-    let longitude = std::f64::consts::PI * (deg_lon + (5.0 * min_lon) / 3.0) / 180.0;
+    let longitude = std::f64::consts::PI * (deg_lon + ((5.0 * min_lon) / 3.0)) / 180.0;
 
     GeoPoint {
         latitude,

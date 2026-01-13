@@ -5,7 +5,7 @@ use quote::quote;
 use syn::{Ident, LitInt, parse_macro_input};
 
 #[proc_macro]
-pub fn test_fn_on_instances_filtered(input: TokenStream) -> TokenStream {
+pub fn test_fn_on_all_instances(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input with parse_macro_input_args);
     let (fn_name, test_name, lower_bound, upper_bound) = input;
 

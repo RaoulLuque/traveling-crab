@@ -4,7 +4,7 @@ use tsp_core::instance::{
     distance::Distance,
     matrix::{Matrix, MatrixSym},
 };
-use tsp_macros::test_fn_on_instances_filtered;
+use tsp_macros::test_fn_on_all_instances;
 
 fn parse_instance_symmetric(path: &str) {
     let parsing_result = std::panic::catch_unwind(|| {
@@ -44,7 +44,7 @@ fn handle_error(err: Box<dyn Any + Send>) {
     }
 }
 
-test_fn_on_instances_filtered!(parse_instance_symmetric, short_symmetric, 0, 50);
-test_fn_on_instances_filtered!(parse_instance_non_symmetric, short_non_symmetric, 0, 50);
-test_fn_on_instances_filtered!(parse_instance_symmetric, symmetric, 51, 10000);
-test_fn_on_instances_filtered!(parse_instance_non_symmetric, non_symmetric, 51, 10000);
+test_fn_on_all_instances!(parse_instance_symmetric, short_symmetric, 0, 50);
+test_fn_on_all_instances!(parse_instance_non_symmetric, short_non_symmetric, 0, 50);
+test_fn_on_all_instances!(parse_instance_symmetric, symmetric, 51, 10000);
+test_fn_on_all_instances!(parse_instance_non_symmetric, non_symmetric, 51, 10000);
