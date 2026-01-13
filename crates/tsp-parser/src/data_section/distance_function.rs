@@ -105,7 +105,10 @@ pub fn convert_to_geo_coordinates(point: &Point2D) -> GeoPoint {
 /// Computes the ATT distance between two points as defined in TSPLIB95.
 #[inline(always)]
 pub fn att_distance_2d(point_a: &Point2D, point_b: &Point2D) -> Distance {
-    let rij = ((point_a.x - point_b.x).powi(2) + (point_a.y - point_b.y).powi(2)).sqrt() / 10.0;
+    let xd = point_a.x - point_b.x;
+    let yd = point_a.y - point_b.y;
+
+    let rij = ((xd.powi(2) + yd.powi(2)) / 10.0).sqrt();
     let tij = nint(rij);
     if (tij as f64) < rij {
         Distance(tij + 1)
