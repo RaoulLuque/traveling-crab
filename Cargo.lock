@@ -634,6 +634,7 @@ dependencies = [
  "criterion",
  "log",
  "tsp-core",
+ "tsp-macros",
  "tsp-parser",
 ]
 

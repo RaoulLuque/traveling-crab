@@ -21,6 +21,7 @@ log = {workspace = true}
 criterion = {workspace = true}
 concorde_rs ={ workspace = true}
 
+tsp-macros = {workspace = true}
 tsp-parser = {workspace = true}
 
 [features]

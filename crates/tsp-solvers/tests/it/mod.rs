@@ -3,6 +3,8 @@ use tsp_core::instance::{
 };
 use tsp_solvers::held_karp;
 
+mod held_karp_correct_length;
+
 #[test]
 fn test_held_karp_on_12() {
     let tsp_instance: TSPSymInstance<Matrix<Distance>> =
